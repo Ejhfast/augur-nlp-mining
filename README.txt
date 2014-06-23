@@ -1,4 +1,4 @@
-(Once I clean up my code, I'll create a repo with my scripts and use this as the Readme:)
+===Workflow
 
 First we download a big corpus of literature.
 
