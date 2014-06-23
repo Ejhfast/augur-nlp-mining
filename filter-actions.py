@@ -17,12 +17,12 @@ def replace(word):
     return "the people"
   return word
 
-def process(line):
-	tokens = line.split('\t')
-	header = tokens[:2]
-	relations = tokens[2:]
-	relations = map(lambda x: replace(x.strip()), relations)
-	if whitelist.get(' '.join(relations).strip()) == True:
-		print  "\t".join(header + relations)
 for line in fileinput.input():
-    process(line)
+  tokens = line.split('\t')
+  header = tokens[:2]
+  relations = tokens[2:]
+  relations = map(lambda x: replace(x.strip()), relations)
+  if whitelist.get(' '.join(relations).strip()) == True:
+    print  "\t".join(header + relations)
+  else:
+    print "NOP"
