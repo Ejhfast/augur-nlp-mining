@@ -26,6 +26,7 @@ IO.read(APPROVED_LIST).split("\n").each do |x|
 end
 
 File.foreach(ARGV[0]) do |line|
+  line = line.force_encoding('UTF-8')
   tokens = line.split("\t")
   header = tokens.take(2)
   relations = tokens.drop(2)
