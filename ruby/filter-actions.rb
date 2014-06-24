@@ -6,7 +6,7 @@
 require 'pp'
 
 # The list of approved tokens. See workflow.txt
-APPROVED_LIST = "tokens/approved-combined.tsv"
+APPROVED_LIST = "../tokens/approved-combined.tsv"
 
 # Word replacement. Basically, the same thing we did with normalizing tokens.
 def replace(word)

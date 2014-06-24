@@ -4,7 +4,6 @@
 
 SKIP = 10
 
-require 'pp'
 ARGF.each_line.each_cons(3) do |group|
   if !(group.first =~ /NOP/)
   	space = group[1].split(" ").last.to_i
@@ -13,7 +12,7 @@ ARGF.each_line.each_cons(3) do |group|
 	    a1, a2 = [group.first, group.last].map do |x|
 	      x.split("\t").drop(2).join(" ").strip
 	    end
-	    puts "#{a1}\t#{a2}\t#{space}" 
+	    puts "#{a1}\t#{a2}\t#{space}"
     end
   end
 end
