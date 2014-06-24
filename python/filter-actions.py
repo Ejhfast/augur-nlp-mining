@@ -1,7 +1,7 @@
 import fileinput
 
 # The list of approved tokens. See workflow.txt
-APPROVED_LIST = "tokens/approved-combined.tsv"
+APPROVED_LIST = "../tokens/approved-combined.tsv"
 
 
 whitelist = {}
