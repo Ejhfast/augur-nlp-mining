@@ -1,7 +1,7 @@
 ### Workflow
 
 Pipeline Overview:
-filter-actions -> collapse-nop -> skip-gram -> count-grams
+run-reverb -> filter-actions -> collapse-nop -> skip-gram -> count-grams
 
 First we download a big corpus of literature.
 
