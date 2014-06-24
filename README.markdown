@@ -1,5 +1,8 @@
 ### Workflow
 
+Pipeline Overview:
+filter-actions -> collapse-nop -> skip-gram -> count-grams
+
 First we download a big corpus of literature.
 
 Next we process all the .txt files in the literature with Reverb, which extracts an ordered list of subject-verb-object relationships and some other data. We write the default Reverb output to a new file: call it corpus.tsv.

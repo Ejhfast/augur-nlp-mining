@@ -5,7 +5,7 @@ counts = Hash.new(0)
 
 ARGF.each_line do |line|
   tokens = line.split("\t")
-  actions = tokens.reverse.drop(1).reverse
+  actions = tokens[0...-1]
   counts[actions] += 1
 end
 

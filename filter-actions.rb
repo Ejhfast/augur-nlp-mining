@@ -22,10 +22,11 @@ end
 # Create whitelist token hash
 whitelist = {}
 IO.read(APPROVED_LIST).split("\n").each do |x|
-  whitelist[x.split("\t").reverse.drop(1).reverse.join(" ")] = true
+  whitelist[x.split("\t")[0...-1].join(" ")] = true
 end
 
 File.foreach(ARGV[0]) do |line|
+  line = line.force_encoding('UTF-8')
   tokens = line.split("\t")
   header = tokens.take(2)
   relations = tokens.drop(2)

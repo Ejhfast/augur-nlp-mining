@@ -1,2 +1,2 @@
-corpus-clean.tsv
-tokens/all-tokens.tsv
+*.tsv
+.DS_Store
