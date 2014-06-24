@@ -1,6 +1,3 @@
-# USE: ruby count-grams.rb bigrams-file.tsv\
-# Creates the bigram model
-
 counts = Hash.new(0)
 
 ARGF.each_line do |line|
