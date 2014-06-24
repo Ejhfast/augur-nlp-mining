@@ -7,6 +7,7 @@ require 'pp'
 
 hash = Hash.new(0)
 ARGF.each_line do |line|
+  line = line.force_encoding('UTF-8')
   tokens = line.split("\t")
   action = tokens.drop(2)
   if ["he","she","you","i","we","they"].include?(action[0])
