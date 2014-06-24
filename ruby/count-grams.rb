@@ -5,8 +5,7 @@ counts = Hash.new(0)
 
 ARGF.each_line do |line|
   tokens = line.split("\t")
-  actions = tokens[0...-1]
-  counts[actions] += 1
+  counts[tokens] += 1
 end
 
 counts.sort_by{|k,v| v*-1 }.each do |el|
