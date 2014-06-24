@@ -1,4 +1,5 @@
 import fileinput
+import operator
 from collections import defaultdict
 
 counts = defaultdict(int)
@@ -11,6 +12,6 @@ for line in fileinput.input():
 	actions = '\t'.join(tokens[:-1])
 	counts[actions] += 1
 
-counts = sorted(counts.iteritems(), key=counts.get).reverse()
+counts = sorted(counts.iteritems(), key=operator.itemgetter(1), reverse= True)
 counts = filter(lambda (k,v): True if v >1 else False, counts)
 map(p, counts)
