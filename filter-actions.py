@@ -1,12 +1,21 @@
+#todo keep track of counts of k and reverse sort
+
 import fileinput
 
-# The list of approved tokens. See workflow.txt
-APPROVED_LIST = "./approved-combined.tsv"
+def approve(actions):
+  #subject match
+  #TODO: automated subject match
+  subject_match = ["i", "you", "he", "she", "it", "we", "you", "they"]
 
+  #object match
+  #TODO: automated object match
+  object_match = ["me", "you", "him", "her", "us", "them", "#"]
 
-whitelist = {}
-for line in open(APPROVED_LIST):
-	whitelist[' '.join(line.split('\t')[:-1]).strip()]= True
+  if any(any(r == s for r in subject_match) for s in actions[0].split(' ')):
+    if not any(any(r == s for r in object_match) for s in actions[2].split(' ')):
+      #k = '\t'.join(actions[1:]).rstrip()
+      return True
+  return False
 
 def replace(word):
   singular = ["he", "she", "him", "i", "myself", "you", "me", "himself", "herself", "yourself"]
@@ -18,11 +27,12 @@ def replace(word):
   return word
 
 for line in fileinput.input():
+  line = line.decode("ascii", "ignore")
   tokens = line.split('\t')
   header = tokens[:2]
-  relations = tokens[2:]
-  relations = map(lambda x: replace(x.strip()), relations)
-  if whitelist.get(' '.join(relations).strip()) == True:
-    print  "\t".join(header + relations)
+  actions = tokens[2:]
+  actions = map(lambda x: replace(x.strip()), actions)
+  if approve(actions):
+    print "\t".join(header + actions)
   else:
     print "NOP"
