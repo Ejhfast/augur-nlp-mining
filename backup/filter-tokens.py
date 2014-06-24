@@ -1,8 +1,7 @@
 import fileinput
-MIN = 10
+MIN = 1
 
 def replace(word):
-	#TODO: see why this filter different from that in filter-actions.py
 	singular = ["he", "she", "him", "i", "myself", "you", "me", "himself", "herself", "yourself"]
 	plural = ["they", "them", "we", "us", "ourselves", "themselves"]
 	if any(s == word for s in singular):
