@@ -2,6 +2,7 @@
 
 Pipeline Overview:
 run-reverb -> filter-actions -> collapse-nop -> skip-gram -> count-grams
+Example command: python run-reverb.py ../stories/chapter_text/ 100 | python filter-actions.py | python collapse-nop.py | ruby skip-gram.rb | ruby count-grams.rb
 
 First we download a big corpus of literature.
 
