@@ -11,7 +11,7 @@ NUM_TO_PRINT = 10
 
 def norm((k,v)):
 	tokens = k.rstrip().split('\t')
-	print (map(lambda x: x.ljust(30), tokens), v)
+	print(k.rstrip() + '\t' + str(v))
 
 def err((k,v)):
 	tokens = k.rstrip().split('\t')
@@ -36,8 +36,6 @@ for line in fileinput.input():
 		c = sorted(counts.iteritems(), key=operator.itemgetter(1), reverse= True)
 		bound = NUM_TO_PRINT
 		filtered =  c[:bound]
-		if(iters >= 300):
-			break
 		while(True):
 			filtered = filter(removeSameAction, filtered)
 			if len(filtered) == NUM_TO_PRINT or len(c) < bound + 1:
