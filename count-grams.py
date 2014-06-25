@@ -1,15 +1,21 @@
+from __future__ import print_function
 import fileinput
 import operator
 from collections import defaultdict
-from sys import stdout
-
+import sys
+import os
 counts = defaultdict(int)
 iters = 0
-refresh_time = 1000
-NUM_TO_PRINT = 20
+refresh_time = 100
+NUM_TO_PRINT = 10
 
-def p((k,v)):
-	stdout.write("%s\n" % k)
+def norm((k,v)):
+	tokens = k.rstrip().split('\t')
+	print(k.rstrip() + '\t' + str(v))
+
+def err((k,v)):
+	tokens = k.rstrip().split('\t')
+	print (map(lambda x: x.ljust(30), tokens), v, file=sys.stderr)
 
 #todo: move this conditional to skip-gram
 def removeSameAction((k,v)):
@@ -19,30 +25,26 @@ def removeSameAction((k,v)):
 	return False
 
 for line in fileinput.input():
-	tokens = line.split('\t')
-	actions = '\t'.join(tokens)
+	actions = line
 	counts[actions] += 1
 	val = counts[actions]
 	counts.values()
 	iters = iters +1
 	if(iters%refresh_time == 0):
-		stdout.flush()
-		stdout.write("===============================\n")
+		os.system('clear')
+		print ("Processed " + str(iters) + " items", file=sys.stderr)
 		c = sorted(counts.iteritems(), key=operator.itemgetter(1), reverse= True)
-		iters = 0
 		bound = NUM_TO_PRINT
 		filtered =  c[:bound]
 		while(True):
 			filtered = filter(removeSameAction, filtered)
-			if len(filtered) == NUM_TO_PRINT:
+			if len(filtered) == NUM_TO_PRINT or len(c) < bound + 1:
 				break
 			filtered.append(c[bound])
 			bound = bound+1
-		map(p, filtered)
-		stdout.write("===============================\n")
+		map(err, filtered)
+		print ("--------------", file=sys.stderr)
 
-"""
 counts = sorted(counts.iteritems(), key=operator.itemgetter(1), reverse= True)
 counts = filter(lambda (k,v): True if v >1 else False, counts)
-map(p, counts)
-"""
+map(norm, counts)
