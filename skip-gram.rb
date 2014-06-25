@@ -6,6 +6,7 @@ LEN = 2 # n for n-gram
 
 magic = 2*(LEN-1)+1
 
+#todo remove where the second action is the same as the first one
 ARGF.each_line.each_cons(magic) do |group|
   if !(group.first =~ /NOP/)
     parsed = group.map { |x| x =~ /NOP/ ? x.split(" ").last.to_i : x }

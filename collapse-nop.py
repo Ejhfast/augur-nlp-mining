@@ -1,3 +1,4 @@
+#todo: combine with filter-actions
 import fileinput
 
 count_nop = 0
