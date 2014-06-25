@@ -1,13 +1,19 @@
 ### Workflow
 
 Pipeline Overview:
-run-reverb -> filter-actions -> collapse-nop -> skip-gram -> count-grams
 
-Example command: python run-reverb.py ../stories/chapter_text/ 100 | python filter-actions.py | python collapse-nop.py | ruby skip-gram.rb | ruby count-grams.rb
+run-reverb -> filterfields -> filter-actions -> collapse-nop -> skip-gram -> count-grams
+
+
+Example command: 
+
+python run-reverb.py | python filterfields.py | python filter-actions.py | python collapse-nop.py | ruby skip-gram.rb | python count-grams.py
+
 
 First we download a big corpus of literature.
 
 Run Reverb
+
 Next we process all the .txt files in the literature with Reverb, which extracts an ordered list of subject-verb-object relationships and some other data. We write the default Reverb output to a new file: call it corpus.tsv. We then remove a bunch of unnecessary stuff from corpus.csv. We just want to keep track of the author (this doesn't work very well, relying on a few string matching heuristics), title, subject, verb, and object for each reverb relation. We write this stripped version of corpus.tsv to corpus-clean.tsv, which has the format:
 
 	Neil Gaiman  The Graveyard Book  he  do  it
