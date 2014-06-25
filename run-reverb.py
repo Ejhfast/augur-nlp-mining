@@ -2,7 +2,7 @@
 
 import subprocess
 import StringIO
-import csv
+
 import sys
 
 numfiles = None
@@ -20,7 +20,3 @@ else:
 	command = "find " + filepath + " |  grep -e '[4-7][0-9]' | head -" + numfiles + " | java -Xmx512m -jar reverb.jar -f | tee watpad.tsv"
 
 scsv = subprocess.check_output(command, shell=True)
-f = StringIO.StringIO(scsv)
-reader = csv.reader(f, delimiter='\t')
-for row in reader:
-	print '\t'.join(row[:5])
