@@ -1,19 +1,26 @@
 ### Workflow
 
 Pipeline Overview:
-filter-actions -> collapse-nop -> skip-gram -> count-grams
+
+run-reverb -> filterfields -> filter-actions -> collapse-nop -> skip-gram -> count-grams
+
+
+Example command: 
+
+python run-reverb.py | python filterfields.py | python filter-actions.py | python collapse-nop.py | ruby skip-gram.rb | python count-grams.py
+
 
 First we download a big corpus of literature.
 
-Next we process all the .txt files in the literature with Reverb, which extracts an ordered list of subject-verb-object relationships and some other data. We write the default Reverb output to a new file: call it corpus.tsv.
+Run Reverb
 
-Next we remove a bunch of unnecessary stuff from corpus.csv. We just want to keep track of the author (this doesn't work very well, relying on a few string matching heuristics), title, subject, verb, and object for each reverb relation. We write this stripped version of corpus.tsv to corpus-clean.tsv, which has the format:
+Next we process all the .txt files in the literature with Reverb, which extracts an ordered list of subject-verb-object relationships and some other data. We write the default Reverb output to a new file: call it corpus.tsv. We then remove a bunch of unnecessary stuff from corpus.csv. We just want to keep track of the author (this doesn't work very well, relying on a few string matching heuristics), title, subject, verb, and object for each reverb relation. We write this stripped version of corpus.tsv to corpus-clean.tsv, which has the format:
 
 	Neil Gaiman  The Graveyard Book  he  do  it
 	Neil Gaiman  The Graveyard Book  he  ask  her
 	...
 
-Next we create a list of person-action-object tokens (e.g., "the person  shake  his head") along with their frequency counts. We throw away everything that doesn't have a person as its subject (we rely on pronouns: he, she, we, they, etc.) or that *does* have a person as its object. We rename matching subjects as "the person" or "the people". Then we throw away everything that occurs less than N times to produce (N-person-to-object.tsv). This guides our analysis towards concrete actions (e.g., "he enters the room") and strips out a lot of inter-personal junk (e.g., "he said to the person"). This file has the format:
+Next we create a list of person-action-object tokens (e.g., "the person  shake  his head") along with their frequency counts. We throw away everything that does have a person as its subject (we rely on pronouns: he, she, we, they, etc.) or that doesn't have a person as its object. We rename matching subjects as "the person" or "the people". Then we throw away everything that occurs less than N times to produce (N-person-to-object.tsv). This guides our analysis towards concrete actions (e.g., "he enters the room") and strips out a lot of inter-personal junk (e.g., "he said to the person"). This file has the format:
 
 	the person  enter  the room  1230
 	the person  open  the door  1134
