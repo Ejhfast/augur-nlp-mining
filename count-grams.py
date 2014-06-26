@@ -4,6 +4,8 @@ import operator
 from collections import defaultdict
 import sys
 import os
+import warnings
+
 counts = defaultdict(int)
 iters = 0
 refresh_time = 500
@@ -25,7 +27,7 @@ for line in fileinput.input():
 	iters = iters +1
 	if(iters%refresh_time == 0):
 		sys.stderr.write("\x1b[2J\x1b[H")
-		print ("Processed " + str(iters) + " items", file=sys.stderr)
+		print ("Outputting " + str(iters) + " items", file=sys.stderr)
 		c = sorted(counts.iteritems(), key=operator.itemgetter(1), reverse= True)
 		filtered =  c[:NUM_TO_PRINT]
 		map(err, filtered)
