@@ -37,16 +37,8 @@ We now filter everything that has a person as its subject (we rely on pronouns: 
 
 Skip Gram
 
-Next we use the previous output to create ngrams, connected by the interleaved NOPs. We throw away ngrams that are too far away from each other in the text (e.g., throw away ngrams connected through NOP N, where N > 10). The ngrams have the format
+Next we use the previous output to create ngrams, connected by the interleaved NOPs. We throw away ngrams that are too far away from each other in the text (e.g., throw away ngrams connected through NOP N, where N > 10). We then filter out the ngrams that have the same actions repeated in the first and second place. Example: "the person open the door  the person open the door" is now filtered out. The ngrams have the format
 	the person open the door  the person open the door
-	the person enter the room  the person open the window
-	the person open the window  the person close the window
-	...
-
-
-Remove Repeated
-
-We then filter out the ngrams that have the same actions repeated in the first and second place. Note the "the person open the door  the person open the door" is now filtered out.
 	the person enter the room  the person open the window
 	the person open the window  the person close the window
 	...
