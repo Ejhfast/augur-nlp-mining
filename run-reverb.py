@@ -15,8 +15,9 @@ if (len(sys.argv) > 2):
 filepath = sys.argv[1]
 command = None
 if(numfiles == None):
-	command = "find " + filepath + " |  grep -e '[4-7][0-9]' | java -Xmx512m -jar reverb.jar -f | tee watpad.tsv"
+	command = "find " + filepath + " |  grep -e '[4-7][0-9]' | java -Xmx512m -jar reverb.jar -f"
 else:
 	command = "find " + filepath + " |  grep -e '[4-7][0-9]' | head -" + numfiles + " | java -Xmx512m -jar reverb.jar -f | tee watpad.tsv"
 
-scsv = subprocess.check_output(command, shell=True)
+#scsv = subprocess.check_output(command, shell=True)
+subprocess.call(command, shell= True)
