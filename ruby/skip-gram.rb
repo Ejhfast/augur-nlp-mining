@@ -2,8 +2,12 @@
 # Preparse data for the n-gram model (each "gram" being a S-V-O action)
 # Allows skipgrams up to SKIP
 
+require 'logger'
+
+logger = Logger.new('log.txt')
+
 SKIP = 10
-LEN = 3 # n for n-gram
+LEN = 5 # n for n-gram
 
 magic = 2*(LEN-1)+1
 
