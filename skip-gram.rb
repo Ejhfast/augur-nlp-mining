@@ -1,6 +1,10 @@
 # Preparse data for the n-gram model (each "gram" being a S-V-O action)
 # Allows skipgrams up to SKIP
 
+require 'logger'
+
+logger = Logger.new('log.txt')
+
 SKIP = 10
 LEN = 2 # n for n-gram
 
@@ -14,7 +18,7 @@ ARGF.each_line.each_cons(magic) do |group|
       strings = parsed.select { |x| x.is_a? String }.map do |x|
         x.split("\t").join(" ").strip
     	end
-      puts strings.join("\t")
+      puts strings.join("\t") if strings.uniq.size > 1
     end
   end
 end

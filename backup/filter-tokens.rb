@@ -1,7 +1,7 @@
 # USE: ruby filter-tokens.rb all-tokens.tsv
 # Throws away tokens thatinclude actions on other people, and tokens that don't occur frequently enough
 
-MIN = 10
+MIN = 100
 
 def replace(word)
   if ["he", "she", "him", "i", "myself", "you", "me", "himself", "herself", "yourself"].include?(word)
