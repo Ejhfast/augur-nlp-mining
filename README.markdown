@@ -2,12 +2,12 @@
 
 Pipeline Overview:
 
-run-reverb -> filterfields -> filter-actions -> collapse-nop -> skip-gram -> count-grams
+run-reverb -> filterfields -> filter-actions -> skip-gram -> remove-repeated -> count-grams
 
 
 Example command: 
 
-python run-reverb.py | python filterfields.py | python filter-actions.py | python collapse-nop.py | ruby skip-gram.rb | python count-grams.py
+python filter-actions.py files/watpad.tsv | ruby skip-gram.rb | python remove-repeated.py | python count-grams.py
 
 
 First we download a big corpus of literature.
