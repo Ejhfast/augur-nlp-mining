@@ -16,7 +16,7 @@ def run():
   total = 0
   count_nop = 0
   discarded = 0
-  APPROVED_LIST = "files/approved-combined.tsv"
+  APPROVED_LIST = "../files/approved-combined.tsv"
   whitelist = {}
   for line in open(APPROVED_LIST):
     whitelist[' '.join(line.split('\t')[1:-1]).rstrip()]= True
