@@ -19,7 +19,7 @@ def approve(actions):
   return False
 
 def run():
-  APPROVED_LIST = "approved-combined.tsv"
+  APPROVED_LIST = "files/approved-combined.tsv"
   whitelist = {}
   for line in open(APPROVED_LIST):
     whitelist[' '.join(line.split('\t')[1:-1]).rstrip()]= True
