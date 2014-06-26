@@ -6,7 +6,7 @@ import sys
 import os
 counts = defaultdict(int)
 iters = 0
-refresh_time = 100
+refresh_time = 500
 NUM_TO_PRINT = 10
 
 def norm((k,v)):
@@ -31,7 +31,7 @@ for line in fileinput.input():
 	counts.values()
 	iters = iters +1
 	if(iters%refresh_time == 0):
-		os.system('clear')
+		sys.stderr.write("\x1b[2J\x1b[H")
 		print ("Processed " + str(iters) + " items", file=sys.stderr)
 		c = sorted(counts.iteritems(), key=operator.itemgetter(1), reverse= True)
 		bound = NUM_TO_PRINT
