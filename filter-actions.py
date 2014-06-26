@@ -25,7 +25,7 @@ for line in open(APPROVED_LIST):
 
 for line in fileinput.input():
   line = line.decode("ascii", "ignore")
-  actions = line.split('\t')
+  actions = line.split('\t')[2:]
   actions = map(lambda x: x.strip(), actions)
   if approve(actions):
     output = "the person " + " ".join(actions[1:]).rstrip()
