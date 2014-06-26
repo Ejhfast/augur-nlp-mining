@@ -1,6 +1,6 @@
-#todo keep track of counts of k and reverse sort
-
+from __future__ import print_function
 import fileinput
+import sys
 
 def approve(actions):
   #subject match
@@ -26,13 +26,18 @@ def run():
 
   for line in fileinput.input():
     line = line.decode("ascii", "ignore")
-    actions = line.split('\t')[2:]
+    actions = line.split('\t')
+    if(len(actions) == 5):
+      actions = actions[2:]
+    if(len(actions) != 3):
+      print ("Warning: Found token with less than 3 parts", file=sys.stderr)
+      continue
     if approve(actions):
       verbobject = " ".join(actions[1:]).rstrip()
       if whitelist.get(verbobject) == True:
         output = "the person " + verbobject
-        print output
+        print(output)
     else:
-      print "NOP"
+      print("NOP")
 
 run()
