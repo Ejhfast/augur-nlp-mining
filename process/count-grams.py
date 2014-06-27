@@ -6,10 +6,6 @@ import sys
 import os
 import warnings
 
-fcounts = defaultdict(int)
-counts = defaultdict(int)
-
-global iters
 refresh_time = 500
 NUM_KEYS_TO_PRINT = 20
 NUM_VALS_TO_PRINT = 5
@@ -23,6 +19,9 @@ def err((k,v)):
 	print (map(lambda x: x.ljust(40), tokens), v, file=sys.stderr)
 
 def actionCount1():
+	iters = 0
+	counts = defaultdict(int)
+
 	for line in fileinput.input():
 		actions = line
 		counts[actions] += 1
@@ -39,7 +38,12 @@ def actionCount1():
 	counts = filter(lambda (k,v): True if v >1 else False, counts)
 	map(norm, counts)
 
+#todo finish output printing
 def actionCount2():
+	iters = 0
+	fcounts = defaultdict(int)
+	counts = defaultdict(int)
+
 	iters = 0
 	follow = {}
 	for line in fileinput.input():
@@ -68,4 +72,6 @@ def actionCount2():
 				#print (map(lambda x: x.ljust(40), tokens), v, file=sys.stderr)
 			print ("--------------", file=sys.stderr)
 
-actionCount2()
+if(len(sys.argv) > 1 and sys.argv[1] == 2):
+	actionCount2()
+actionCount1()

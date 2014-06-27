@@ -6,6 +6,12 @@ import sys
 import itertools
 from itertools import tee, izip
 
+"""Todos: 
+    Make work with tsv whitelists
+    Replace possessive pronouns with 'the'
+    Implement closing the file
+    Explore second action constraints
+"""
 
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
@@ -22,48 +28,44 @@ def approve(actions):
       return True
   return False
 
-#todo: make work with tsv whitelists
-"""
-APPROVED_LIST = "../files/approved-combined.tsv"
-whitelist = {}
-for line in open(APPROVED_LIST):
-  whitelist[' '.join(line.split('\t')[1:-1]).rstrip()]= True
-"""
 
-#todo implement closing the file
 def fillinput():
   inp = None
   inf = None
-
+  iswhitelisttsv = None
   if len(sys.argv) == 3:
-    inf = open(sys.argv[2])
     inp = open(sys.argv[1])
-
+    inf = open(sys.argv[2])
   elif len(sys.argv) == 2:
-    if '.txt' or 'approved' or 'whitelist' in sys.argv[1]:
+    if any(map(lambda word: word in sys.argv[1], ['.txt', 'approved', 'whitelist'])):
       inf = open(sys.argv[1])
       inp = sys.stdin
     else:
-      inf = sys.stdin
       inp = open(sys.argv[1])
-  
-  return (inp, inf)
+      iswhitelisttsv = True
+  elif len(sys.argv) == 1:
+    inp = sys.stdin
+    iswhitelisttsv = True
+  else:
+    exit(1)
+
+  return (inp, inf, iswhitelisttsv)
 
 def run():
   total = 0
   count_nop = 0
   discarded = 0
+  (inp, inf, iswhitelisttsv) = fillinput()
+  whitelist = {}
+  if(iswhitelisttsv):
+    APPROVED_LIST = "../files/approved-combined.tsv"
+    for line in open(APPROVED_LIST):
+      whitelist[' '.join(line.split('\t')[1:-1]).rstrip()]= True
+  else:
+      whitelist = inf.read().split()
 
-  (inp, inf) = fillinput()
-
-  wl = inf.read().split()
-
-  last_approved = " "
-
-  for line1, line2 in pairwise(inp):
-    
+  for line1, line2 in pairwise(inp):  
     total = total + 1
-    
     [line1, line2] = map(lambda line: line.decode("ascii", "ignore").rstrip(), [line1, line2])
     [actions1, actions2] = map(lambda line: map(lambda x: ' '.join(x.split()), line.split('\t')), [line1, line2])
     [actions1, actions2] = map(lambda actions : actions[2:] if(len(actions) == 5) else actions, [actions1, actions2])
@@ -72,11 +74,8 @@ def run():
       continue
     if all(map(lambda actions: approve(actions), [actions1, actions2])):
       [verbobject1, verbobject2] = map(lambda actions:" ".join(actions[1:]).rstrip(), [actions1, actions2])
-      #todo : any vs all
-      if len(set(actions1[2].split()).intersection(wl)) > 0:
-      #if all(map(lambda actions: len(set(actions[2].split()).intersection(wl)) > 0, [actions1, actions2])):
-      #if whitelist.get(verbobject) == True:
-        [output1, output2] = map(lambda verbobject: verbobject, [verbobject1, verbobject2])
+      if (iswhitelisttsv and whitelist.get(verbobject1) == True) or (not iswhitelisttsv and len(set(verbobject1.split()).intersection(whitelist)) > 0):
+        [output1, output2] = map(lambda verbobject: "the person " + verbobject, [verbobject1, verbobject2])
         print("NOP ", count_nop)
         print(output1)
         print("NOP ", 0)
