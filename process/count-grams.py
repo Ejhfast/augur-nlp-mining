@@ -9,7 +9,7 @@ import warnings
 counts = defaultdict(int)
 iters = 0
 refresh_time = 500
-NUM_TO_PRINT = 10
+NUM_TO_PRINT = 25
 
 def norm((k,v)):
 	tokens = k.rstrip().split('\t')
