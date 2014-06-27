@@ -1,3 +1,6 @@
+# Create data that generates a force-directed graph
+# Only currently usable on subsets of the data, (e.g., grep "dinner" bigrams.tsv)
+
 require 'json'
 
 bigrams = IO.read(ARGV[0]).split("\n").map { |x| x.split("\t").take(2).map{ |x| x.gsub("the person","") } }
@@ -22,16 +25,3 @@ mapping.keys.each do |src|
 end
 
 puts ({'nodes' => nodes, 'links' => edges }).to_json
-
-# var postLoadData = {
-# nodes:{
-# joe:{'color':'orange','shape':'dot','label':'joe'},
-# fido:{'color':'green','shape':'dot','label':'fido'},
-# fluffy:{'color':'blue','shape':'dot','label':'fluffy'}
-# },
-# edges:{
-# dog:{ fido:{} },
-# cat:{ fluffy:{} },
-# joe:{ fluffy:{},fido:{} }
-# }
-# };
