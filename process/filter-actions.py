@@ -73,9 +73,10 @@ def run():
     if all(map(lambda actions: approve(actions), [actions1, actions2])):
       [verbobject1, verbobject2] = map(lambda actions:" ".join(actions[1:]).rstrip(), [actions1, actions2])
       #todo : any vs all
-      if any(map(lambda actions: len(set(actions[2].split()).intersection(wl)) > 0, [actions1, actions2])):
+      if len(set(actions1[2].split()).intersection(wl)) > 0:
+      #if all(map(lambda actions: len(set(actions[2].split()).intersection(wl)) > 0, [actions1, actions2])):
       #if whitelist.get(verbobject) == True:
-        [output1, output2] = map(lambda verbobject: "the person " + verbobject, [verbobject1, verbobject2])
+        [output1, output2] = map(lambda verbobject: verbobject, [verbobject1, verbobject2])
         print("NOP ", count_nop)
         print(output1)
         print("NOP ", 0)
