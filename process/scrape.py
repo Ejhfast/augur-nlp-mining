@@ -9,6 +9,4 @@ import urllib2
 html_doc = open('sample.html','r')
 soup = BeautifulSoup(html_doc)
 tables = soup.find_all('table')
-print filter(lambda x: len(x) > 1, tables[2].text.split())
-
-print map(unicode,tables[3].find_all('a'))
+print ' '.join(filter(lambda x: len(x) > 1, tables[2].text.lower().split()))
