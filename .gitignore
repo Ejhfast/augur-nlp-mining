@@ -1,3 +1,4 @@
 *.tsv
 .DS_Store
-log.txt
+*.txt
+*.html
