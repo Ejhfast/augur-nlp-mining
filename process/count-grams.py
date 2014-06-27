@@ -17,7 +17,7 @@ def norm((k,v)):
 
 def err((k,v)):
 	tokens = k.rstrip().split('\t')
-	print (map(lambda x: x.ljust(30), tokens), v, file=sys.stderr)
+	print (map(lambda x: x.ljust(40), tokens), v, file=sys.stderr)
 
 for line in fileinput.input():
 	actions = line
