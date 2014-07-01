@@ -12,6 +12,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var spawn = require('child_process').spawn;
 var exec = require('child_process').exec;
+var fs = require('fs');
 
 
 app.set('views', path.join(__dirname, 'views'));
@@ -30,6 +31,17 @@ server.listen( app.get('port'), function(){
 
 app.use('/main', routes);
 app.use('/users', users);
+app.post('/createwordlist', function(req, res){
+    wordliststring = req.body.words.toString('utf8')
+    fs.writeFile("./wh-dynam.txt", wordliststring, function(err) {
+        if(err) {
+            console.log(err);
+        } else {
+            console.log("The file was saved!");
+        }
+    });
+    res.send(200) 
+});
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -65,29 +77,31 @@ app.use(function(err, req, res, next) {
 
 
 io.on('connection', function (socket) {
-    var prefilter = spawn('python', ['../process/prefilter.py', '../files/watpad.tsv']);
-    var filter = spawn('python', ['../process/filter-actions.py', '../process/sampwhitelist.txt']);
-    var skip = spawn('ruby', ['../process/skip-gram.rb']);
-    var count = spawn('python', ['../process/count-grams.py', '2']);
+    socket.on('wlsubmit', function(){
+        var prefilter = spawn('python', ['../process/prefilter.py', '../files/watpad.tsv']);
+        var filter = spawn('python', ['../process/filter-actions.py', './wh-dynam.txt']);
+        var skip = spawn('ruby', ['../process/skip-gram.rb']);
+        var count = spawn('python', ['../process/count-grams.py', '2']);
 
-    prefilter.stdout.on('data', function (data) {
-    filter.stdin.write(data);
-    });
+        prefilter.stdout.on('data', function (data) {
+        filter.stdin.write(data);
+        });
 
-    filter.stdout.on('data', function (data) {
-    skip.stdin.write(data);
-    });
+        filter.stdout.on('data', function (data) {
+        skip.stdin.write(data);
+        });
 
-    skip.stdout.on('data', function (data) {
-    //count.stdin.write(data);
-        data = data.toString('utf8')
-        socket.emit('res', data)
-    });
-    
-    count.stderr.on('data', function (data) {
-    });
+        skip.stdout.on('data', function (data) {
+        //count.stdin.write(data);
+            data = data.toString('utf8')
+            socket.emit('res', data)
+        });
+        
+        count.stderr.on('data', function (data) {
+        });
 
-    filter.stderr.on('data', function (data) {
-    console.log(data.toString('utf8'));
+        filter.stderr.on('data', function (data) {
+        console.log(data.toString('utf8'));
+        });
     });
 });

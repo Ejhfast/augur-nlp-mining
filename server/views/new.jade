@@ -5,9 +5,9 @@ block content
 	p Welcome to #{title}
 	script(src="/jquery.js")
 	script(src="/socket.io/socket.io.js")
-	script(src="/main.js")
-	form(name="wordlist", action="/createwordlist", method="post")
-		input(type="text", name="words")
+	form(id = "wl", name="wordlist", action="/createwordlist", method="post")
+		input(type="text", name="words" id = "words")
 		input(type="submit", value="submit")
 	#response
 		| Hi
+	script(src="/main.js")
