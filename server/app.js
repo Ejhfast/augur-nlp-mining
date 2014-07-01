@@ -10,6 +10,9 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var spawn = require('child_process').spawn;
+var exec = require('child_process').exec;
+
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -25,7 +28,7 @@ server.listen( app.get('port'), function(){
     console.log("Server listening on " + app.get('port'))
 });
 
-app.use('/', routes);
+app.use('/main', routes);
 app.use('/users', users);
 
 /// catch 404 and forward to error handler
@@ -60,8 +63,29 @@ app.use(function(err, req, res, next) {
 });
 
 io.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
+    var prefilter = spawn('python', ['../process/prefilter.py', '../files/watpad.tsv']);
+    var filter = spawn('python', ['../process/filter-actions.py', '../process/sampwhitelist.txt']);
+    var skip = spawn('ruby', ['../process/skip-gram.rb']);
+    var count = spawn('python', ['../process/count-grams.py', '2']);
+
+    prefilter.stdout.on('data', function (data) {
+    filter.stdin.write(data);
+    });
+
+    filter.stdout.on('data', function (data) {
+    skip.stdin.write(data);
+    });
+
+    skip.stdout.on('data', function (data) {
+    //count.stdin.write(data);
+    data = data.toString('utf8')
+    socket.emit('res', data) 
+    });
+    
+    count.stderr.on('data', function (data) {
+    });
+
+    filter.stderr.on('data', function (data) {
+    console.log(data.toString('utf8'));
+    });
 });
