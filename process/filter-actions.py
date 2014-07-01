@@ -6,11 +6,12 @@ import sys
 import itertools
 from itertools import tee, izip
 
+
 """Todos: 
-    Make work with tsv whitelists
     Replace possessive pronouns with 'the'
     Implement closing the file
     Explore second action constraints
+    seperate first and second line acceptance
 """
 
 def pairwise(iterable):
@@ -19,20 +20,29 @@ def pairwise(iterable):
     next(a, None)
     return izip(a, b)
 
-
-def approve(actions):
-  subject_match = ["i", "you", "he", "she", "we", "they"]
-  object_match = ["me", "you", "him", "his", "her", "us", "them", "#", "i", "you", "he", "she", "we", "they", "it"]
-  if len(set(subject_match).intersection(actions[0].split())) > 0:
-    if len(set(object_match).intersection(actions[2].split())) == 0:
-      return True
+subjects = set(["i", "you", "he", "she", "we", "they"])
+  
+def subject_match(actions):
+  if len(subjects.intersection(actions[0].split())) > 0:
+    return True
   return False
 
+objects = set(["me", "you", "him", "his", "her", "us", "them", "#", "i", "you", "he", "she", "we", "they", "it"])
+  
+def object_match(actions):
+  if len(objects.intersection(actions[2].split())) == 0:
+    return True
+  return False
+
+
+
+def approve(actions):
+  return all([subject_match(actions), object_match(actions)])
 
 def fillinput():
   inp = None
   inf = None
-  iswhitelisttsv = None
+  nowhitelist = False
   if len(sys.argv) == 3:
     inp = open(sys.argv[1])
     inf = open(sys.argv[2])
@@ -42,27 +52,24 @@ def fillinput():
       inp = sys.stdin
     else:
       inp = open(sys.argv[1])
-      iswhitelisttsv = True
+      nowhitelist = True
   elif len(sys.argv) == 1:
     inp = sys.stdin
-    iswhitelisttsv = True
+    nowhitelist = True
   else:
     exit(1)
 
-  return (inp, inf, iswhitelisttsv)
+  return (inp, inf, nowhitelist)
 
 def run():
   total = 0
   count_nop = 0
   discarded = 0
-  (inp, inf, iswhitelisttsv) = fillinput()
-  whitelist = {}
-  if(iswhitelisttsv):
-    APPROVED_LIST = "../files/approved-combined.tsv"
-    for line in open(APPROVED_LIST):
-      whitelist[' '.join(line.split('\t')[1:-1]).rstrip()]= True
-  else:
-      whitelist = inf.read().split()
+  (inp, inf, nowhitelist) = fillinput()
+  if not nowhitelist:
+    whitelist = set(inf.read().split())
+  
+  #recode to do one line at a time
 
   for line1, line2 in pairwise(inp):  
     total = total + 1
@@ -74,8 +81,8 @@ def run():
       continue
     if all(map(lambda actions: approve(actions), [actions1, actions2])):
       [verbobject1, verbobject2] = map(lambda actions:" ".join(actions[1:]).rstrip(), [actions1, actions2])
-      if (iswhitelisttsv and whitelist.get(verbobject1) == True) or (not iswhitelisttsv and len(set(verbobject1.split()).intersection(whitelist)) > 0):
-        [output1, output2] = map(lambda verbobject: "the person " + verbobject, [verbobject1, verbobject2])
+      if nowhitelist or len(whitelist.intersection(verbobject1.split()))> 0:
+        [output1, output2] = map(lambda verbobject: verbobject, [verbobject1, verbobject2])
         print("NOP ", count_nop)
         print(output1)
         print("NOP ", 0)
