@@ -62,6 +62,8 @@ app.use(function(err, req, res, next) {
     });
 });
 
+
+
 io.on('connection', function (socket) {
     var prefilter = spawn('python', ['../process/prefilter.py', '../files/watpad.tsv']);
     var filter = spawn('python', ['../process/filter-actions.py', '../process/sampwhitelist.txt']);
@@ -78,8 +80,8 @@ io.on('connection', function (socket) {
 
     skip.stdout.on('data', function (data) {
     //count.stdin.write(data);
-    data = data.toString('utf8')
-    socket.emit('res', data) 
+        data = data.toString('utf8')
+        socket.emit('res', data)
     });
     
     count.stderr.on('data', function (data) {
