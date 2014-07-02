@@ -6,14 +6,6 @@ import sys
 import itertools
 from itertools import tee, izip
 
-
-"""Todos: 
-    Replace possessive pronouns with 'the'
-    Implement closing the file
-    Explore second action constraints
-    seperate first and second line acceptance
-"""
-
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b= tee(iterable)
@@ -33,8 +25,6 @@ def object_match(actions):
   if len(objects.intersection(actions[2].split())) == 0:
     return True
   return False
-
-
 
 def approve(actions):
   return all([subject_match(actions), object_match(actions)])
