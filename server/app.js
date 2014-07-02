@@ -33,13 +33,8 @@ app.use('/main', routes);
 app.use('/users', users);
 app.post('/createwordlist', function(req, res){
     wordliststring = req.body.words.toString('utf8')
-    fs.writeFile("./wh-dynam.txt", wordliststring, function(err) {
-        if(err) {
-            console.log(err);
-        } else {
-            console.log("The file was saved!");
-        }
-    });
+    fs.writeFileSync("./wh-dynam.txt", wordliststring)
+    console.log("The file was saved!");
     res.send(200) 
 });
 
@@ -78,11 +73,14 @@ app.use(function(err, req, res, next) {
 
 io.on('connection', function (socket) {
     socket.on('wlsubmit', function(){
-        var prefilter = spawn('python', ['../process/prefilter.py', '../files/watpad.tsv']);
-        var filter = spawn('python', ['../process/filter-actions.py', './wh-dynam.txt']);
-        var skip = spawn('ruby', ['../process/skip-gram.rb']);
-        var count = spawn('python', ['../process/count-grams.py', '2']);
+        //var prefilter = spawn('python', ['../process/prefilter.py', '../files/watpad.tsv']);
+        //var filter = spawn('python', ['../process/filter-actions.py', './wh-dynam.txt']);
+        //var skip = spawn('ruby', ['../process/skip-gram.rb']);
+        //var count = spawn('python', ['../process/count-grams.py', '2']);
 
+        var overview = spawn("sh", ["./overview.sh"])
+
+        /*
         prefilter.stdout.on('data', function (data) {
         filter.stdin.write(data);
         });
@@ -95,6 +93,7 @@ io.on('connection', function (socket) {
         //count.stdin.write(data);
             data = data.toString('utf8')
             socket.emit('res', data)
+            console.log(data)
         });
         
         count.stderr.on('data', function (data) {
@@ -103,5 +102,17 @@ io.on('connection', function (socket) {
         filter.stderr.on('data', function (data) {
         console.log(data.toString('utf8'));
         });
+        */
+
+        overview.stderr.on('data', function (data) {
+            data = data.toString('utf8');
+            console.log(data)
+            socket.emit('err', data)    
+        });
+
+        overview.stdout.on('data', function (data){
+            data = data.toString('utf8')
+            socket.emit('res', data)
+        })   
     });
 });
