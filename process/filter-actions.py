@@ -9,7 +9,7 @@ from itertools import tee, izip
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b= tee(iterable)
-    next(a, None)
+    next(b, None)
     return izip(a, b)
 
 subjects = set(["i", "you", "he", "she", "we", "they"])
@@ -54,11 +54,10 @@ def fillinput():
 
 def run():
   total = 0
-  count_nop = 0
+  count_nop = 1
   discarded = 0
   whitelist = {}
   (inp, inf, nowhitelist, isTsv) = fillinput()
-  print (inp, inf, nowhitelist, isTsv)
   if not nowhitelist:
     if isTsv:
       for line in inf:
@@ -80,9 +79,9 @@ def run():
         [output1, output2] = map(lambda verbobject: verbobject, [verbobject1, verbobject2])
         print("NOP ", count_nop)
         print(output1)
-        print("NOP ", 0)
+        print("NOP ", 1)
         print(output2)
-        count_nop = 0
+        count_nop = 1
     else:
       count_nop += 1
     if(total%100000 ==0):
