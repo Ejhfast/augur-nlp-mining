@@ -1,4 +1,4 @@
 *.tsv
 .DS_Store
 *.txt
-*.html
+files/
