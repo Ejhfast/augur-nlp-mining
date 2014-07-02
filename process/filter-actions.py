@@ -33,33 +33,38 @@ def fillinput():
   inp = None
   inf = None
   nowhitelist = False
+  isTsv = False
   if len(sys.argv) == 3:
     inp = open(sys.argv[1])
     inf = open(sys.argv[2])
+    if any(map(lambda word: word in sys.argv[2], ['.tsv'])):
+      isTsv = True
   elif len(sys.argv) == 2:
-    if any(map(lambda word: word in sys.argv[1], ['.txt', 'approved', 'whitelist'])):
       inf = open(sys.argv[1])
       inp = sys.stdin
-    else:
-      inp = open(sys.argv[1])
-      nowhitelist = True
+      if any(map(lambda word: word in sys.argv[1], ['.tsv'])):
+        isTsv = True
   elif len(sys.argv) == 1:
     inp = sys.stdin
     nowhitelist = True
   else:
     exit(1)
 
-  return (inp, inf, nowhitelist)
+  return (inp, inf, nowhitelist, isTsv)
 
 def run():
   total = 0
   count_nop = 0
   discarded = 0
-  (inp, inf, nowhitelist) = fillinput()
+  whitelist = {}
+  (inp, inf, nowhitelist, isTsv) = fillinput()
+  print (inp, inf, nowhitelist, isTsv)
   if not nowhitelist:
-    whitelist = set(inf.read().split())
-  
-  #recode to do one line at a time
+    if isTsv:
+      for line in inf:
+        whitelist[' '.join(line.split('\t')[1:-1]).rstrip()]= True
+    else:
+      whitelist = set(inf.read().split())
 
   for line1, line2 in pairwise(inp):  
     total = total + 1
@@ -71,7 +76,7 @@ def run():
       continue
     if all(map(lambda actions: approve(actions), [actions1, actions2])):
       [verbobject1, verbobject2] = map(lambda actions:" ".join(actions[1:]).rstrip(), [actions1, actions2])
-      if nowhitelist or len(whitelist.intersection(verbobject1.split()))> 0:
+      if nowhitelist or (not isTsv and len(whitelist.intersection(verbobject1.split()))> 0) or (isTsv and whitelist.get(verbobject1) == True):
         [output1, output2] = map(lambda verbobject: verbobject, [verbobject1, verbobject2])
         print("NOP ", count_nop)
         print(output1)
@@ -82,5 +87,6 @@ def run():
       count_nop += 1
     if(total%100000 ==0):
       print("Processed " + str(total) + " input lines. " + str(discarded) + " discarded", file=sys.stderr,  end="\r")
-
+  inp.close()
+  inf.close()
 run()
