@@ -1,0 +1,11 @@
+extends layout
+
+block content
+	script(src="/jquery.js")
+	script(src="/socket.io/socket.io.js")
+	#err
+	form(id = "wl", name="wordlist", action="/createwordlist", method="post")
+		input(type="text", name="words" id = "words")
+		input(type="submit", value="submit")
+	#response
+	script(src="/main.js")

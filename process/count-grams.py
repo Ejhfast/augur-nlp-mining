@@ -46,7 +46,7 @@ def actionCount2():
 
 	iters = 0
 	follow = {}
-	for line in fileinput.input():
+	for line in sys.stdin:
 		actions = line.split('\t')
 		first = actions[0]
 		second = actions[1].rstrip()
@@ -67,11 +67,14 @@ def actionCount2():
 				following = set(follow[first])
 				print(first.ljust(40), end='', file = sys.stderr)
 				c = sorted(following, key=lambda f: counts.get(first + '\t' + f), reverse= True)
+				d = map(lambda x: first + '\t' + x, c)
+				d = map(lambda x: counts[x], d)
+				d = d[:5]if len(d) > NUM_VALS_TO_PRINT else d
 				c = c[:5] if len(c) > NUM_VALS_TO_PRINT else c
-				print (c, file = sys.stderr)
+				print (c, d, file = sys.stderr)
 				#print (map(lambda x: x.ljust(40), tokens), v, file=sys.stderr)
 			print ("--------------", file=sys.stderr)
 
-if(len(sys.argv) > 1 and sys.argv[1] == 2):
+if(len(sys.argv) > 1 and sys.argv[1] == "2"):
 	actionCount2()
 actionCount1()
