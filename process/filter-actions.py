@@ -66,7 +66,6 @@ def run():
       whitelist = set(inf.read().split())
 
   for line1, line2 in pairwise(inp):  
-    print (line1, line2)
     total = total + 1
     [line1, line2] = map(lambda line: line.decode("ascii", "ignore").rstrip(), [line1, line2])
     [actions1, actions2] = map(lambda line: map(lambda x: ' '.join(x.split()), line.split('\t')), [line1, line2])
