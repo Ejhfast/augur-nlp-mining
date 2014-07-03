@@ -80,7 +80,7 @@ io.on('connection', function (socket) {
         
         exec('wc -l ' + filename, function (error, stdout, stderr) {
             var s = stdout;
-            linecount = parseInt(stdout.split(' ')[1]);
+            linecount = parseInt(stdout.trim().split(' ')[0]);
             console.log(linecount);
             socket.emit('count', linecount);
             if (error !== null) {
