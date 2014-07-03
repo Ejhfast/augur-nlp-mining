@@ -74,7 +74,7 @@ app.use(function(err, req, res, next) {
 io.on('connection', function (socket) {
     socket.on('wlsubmit', function(){
         var linecount = 0
-        var filename = '../files/watpad-small.tsv';
+        var filename = '../files/sample.tsv';
         var wc = exec('wc -l ' + filename, function(error, stdout,stderr){
             var s = stdout;
             linecount = parseInt(stdout.split(' ')[1])
@@ -84,7 +84,7 @@ io.on('connection', function (socket) {
               console.log('exec error: ' + error);
             }
         });
-        
+
         var prefilter = spawn('python', ['../process/prefilter.py', filename]);
         var filter = spawn('python', ['../process/filter-actions.py', './wh-dynam.txt']);
         var skip = spawn('python', ['../process/skip-gram.py']);
