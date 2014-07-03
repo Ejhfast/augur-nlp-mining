@@ -1,2 +1,2 @@
-Install node and npm
-Then perform npm install
+Install node. To start server, perform node app.js
+
