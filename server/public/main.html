@@ -68,6 +68,25 @@
             .progress{
                 border-radius: 0px;
             }
+            
+            #title{
+                font-weight: 100
+            }
+            
+            #title > strong{
+                font-weight: 500
+            }
+            
+            #caption{
+                margin-top: 20px;   
+                font-weight: 100;
+            }
+            
+            #words{
+                font-weight: 100;
+                font-size: 20px;
+            }
+            
         </style>
         <script src="/socket.io/socket.io.js"></script>
     </head>
@@ -76,9 +95,9 @@
         <section id = "header-section">
             <div class ="container">
                 <div class= "row">
-                    <div class = "col-md-6">
-                        <h1> Mining Fiction To Predict the Future </h1>
-                        <h4> What do you see around you? </h4>
+                    <div class = "col-md-5">
+                        <h1 id = 'title'> Mining Fiction <br> To Predict the <strong>Future</strong> </h1>
+                        <h4 id = "caption"> What do you see around you? </h4>
                         <form id = "wl" name="wordlist" action="/createwordlist" method="post">
                             <div class="input-group input-group-lg" id="header-src-wrap">
                                 <input type="search" name="words" autocomplete="off" class="form-control" id="words">
@@ -91,7 +110,7 @@
 
                     </div>
 
-                    <div class = "col-md-6">
+                    <div class = "col-md-7">
                         <div id = "err">
 
                         </div>
@@ -227,6 +246,8 @@
 
 
 		$('#wl').submit(function(event) {
+            $('.progress-bar').css('width', 0 + '%').attr('aria-valuenow', 0);
+            $('#wl').slideToggle(400)
 			saveWordList()
 			$.ajax({
 				type : "POST",
