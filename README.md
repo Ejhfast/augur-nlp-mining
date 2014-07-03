@@ -5,9 +5,9 @@ Pipeline Overview:
 run-reverb -> filterfields -> prefilter -> filter-actions -> skip-gram -> count-grams
 
 
-Example command: 
+Example command (to be executed in the process folder): 
 
-python prefilter.py files/watpad.tsv | python filter-actions.py files/approved.txt | ruby skip-gram.rb | python remove-repeated.py | python count-grams.py
+python prefilter.py ../files/sample.tsv | python filter-actions.py ../files/sampwhitelist.txt | python skip-gram.py | python count-grams.py
 
 
 First we download a big corpus of literature.

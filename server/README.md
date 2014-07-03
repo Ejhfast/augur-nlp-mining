@@ -1,2 +1,2 @@
-Express App
-v 4.2
+Install node. To start server, perform node app.js
+
