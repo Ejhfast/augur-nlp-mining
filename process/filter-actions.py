@@ -13,14 +13,14 @@ def pairwise(iterable):
     return izip(a, b)
 
 subjects = set(["i", "you", "he", "she", "we", "they"])
-  
+
 def subject_match(actions):
   if len(subjects.intersection(actions[0].split())) > 0:
     return True
   return False
 
 objects = set(["me", "you", "him", "his", "her", "us", "them", "#", "i", "you", "he", "she", "we", "they", "it"])
-  
+
 def object_match(actions):
   if len(objects.intersection(actions[2].split())) == 0:
     return True
@@ -65,7 +65,7 @@ def run():
     else:
       whitelist = set(inf.read().split())
 
-  for line1, line2 in pairwise(inp):  
+  for line1, line2 in pairwise(inp):
     total = total + 1
     [line1, line2] = map(lambda line: line.decode("ascii", "ignore").rstrip(), [line1, line2])
     [actions1, actions2] = map(lambda line: map(lambda x: ' '.join(x.split()), line.split('\t')), [line1, line2])
@@ -75,7 +75,7 @@ def run():
       continue
     if all(map(lambda actions: approve(actions), [actions1, actions2])):
       [verbobject1, verbobject2] = map(lambda actions:" ".join(actions[1:]).rstrip(), [actions1, actions2])
-      if nowhitelist or (not isTsv and len(whitelist.intersection(verbobject1.split()))> 0 or len(whitelist.intersection(verbobject2.split()))> 0) or (isTsv and whitelist.get(verbobject1) == True):
+      if nowhitelist or (not isTsv and (len(whitelist.intersection(verbobject1.split())) > 0 or len(whitelist.intersection(verbobject2.split()))> 0)) or (isTsv and whitelist.get(verbobject1) == True):
         [output1, output2] = map(lambda verbobject: verbobject, [verbobject1, verbobject2])
         print("NOP ", count_nop)
         print(output1)
