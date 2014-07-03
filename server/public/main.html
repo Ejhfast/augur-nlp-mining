@@ -53,7 +53,7 @@
 
 			#header-section {
 				padding-top: 120px;
-				padding-bottom: 180px;
+				padding-bottom: 240px;
 				position: relative;
 				overflow: hidden;
 				color: white;
@@ -65,7 +65,9 @@
 				border-bottom: 1px solid #000;
 				width: 200px;
 			}
-
+            .progress{
+                border-radius: 0px;
+            }
         </style>
         <script src="/socket.io/socket.io.js"></script>
     </head>
@@ -102,7 +104,7 @@
         </section>
         <div id = "progress-showing">
             <div class="progress">
-                <div class="progress-bar progress-bar-striped active"  role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%"></div>
+                <div class="progress-bar progress-bar-striped active"  role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
             </div>
         </div>
 
@@ -240,23 +242,18 @@
 			showCards(b)
 			//$('#response').text(JSON.stringify(f));
 		});
-
+        var total = 10000
 		socket.on('err', function(data) {
 			var j = JSON.stringify(data)
 			var k = parseInt(j.split(' ')[1])
-			$('.progress-bar').css('width', k/10000 + '%').attr('aria-valuenow', k/10000);
+			$('.progress-bar').css('width', k/(total/100) + '%').attr('aria-valuenow', k/(total/100));
 			$('#err').text(j.split(' ')[1]);
-		})
+		});
 
-
-		var $bar = $('.bar');
-
-		if ($bar.width() == window.innerwidth) {
-			$('.progress').removeClass('active');
-		} else {
-			$bar.width($bar.width() + 40);
-		}
-		$bar.text($bar.width() / 4 + "%");
-
+		socket.on('count', function(data){
+		    total = data;
+		    console.log(total)
+            $('.progress-bar').attr('aria-valuemax', total);
+		});
     </script>
 </html>
