@@ -75,7 +75,7 @@ def run():
       continue
     if all(map(lambda actions: approve(actions), [actions1, actions2])):
       [verbobject1, verbobject2] = map(lambda actions:" ".join(actions[1:]).rstrip(), [actions1, actions2])
-      if nowhitelist or (not isTsv and len(whitelist.intersection(verbobject1.split()))> 0) or (isTsv and whitelist.get(verbobject1) == True):
+      if nowhitelist or (not isTsv and len(whitelist.intersection(verbobject1.split()))> 0 or len(whitelist.intersection(verbobject2.split()))> 0) or (isTsv and whitelist.get(verbobject1) == True):
         [output1, output2] = map(lambda verbobject: verbobject, [verbobject1, verbobject2])
         print("NOP ", count_nop)
         print(output1)
