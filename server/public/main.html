@@ -54,7 +54,7 @@ Remove this if you use the .htaccess -->
             #header-section {
                 padding-top: 120px;
                 padding-bottom: 240px;
-                height: 700px;
+                min-height: 500px;
                 position: relative;
                 overflow: hidden;
                 color: white;
@@ -79,7 +79,7 @@ Remove this if you use the .htaccess -->
             }
 
             #title{
-                font-weight: 100
+                font-weight: 100;
             }
 
             #title > strong{
@@ -207,6 +207,9 @@ Remove this if you use the .htaccess -->
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 <script src="bootstrap/js/bootstrap.min.js"></script>
 <script>
+    $(window).on('load resize', function(){
+    $('#header-section').height($(this).innerHeight()-500);
+    });
     a = {}
     b = []
     dict = {}
@@ -269,7 +272,7 @@ Remove this if you use the .htaccess -->
         $('#end').text(end);
         $('#freq').text(freq);
     }
-
+    
     function showCards(arr) {
         arr.sort(compareByFreq);
         l = arr.length
