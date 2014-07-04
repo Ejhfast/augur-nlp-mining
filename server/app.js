@@ -1,7 +1,7 @@
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var path = require('path');
-var express = require('express')
+var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
@@ -24,22 +24,24 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
 
-server.listen( app.get('port'), function(){
-    console.log("Server listening on " + app.get('port'))
+
+server.listen(app.get('port'), function () {
+    console.log("Server listening on " + app.get('port'));
 });
 
 app.use('/main', routes);
 app.use('/users', users);
-app.post('/createwordlist', function(req, res){
-    wordliststring = req.body.words.toString('utf8')
-    fs.writeFileSync("./wh-dynam.txt", wordliststring)
+app.post('/createwordlist', function (req, res) {
+    var wordliststring = req.body.words.toString('utf8');
+    fs.writeFileSync("./wh-dynam.txt", wordliststring);
     console.log("The file was saved!");
-    res.send(200) 
+    res.send(200);
 });
 
 /// catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
@@ -50,7 +52,7 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
+    app.use(function (err, req, res, next) {
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,
@@ -61,7 +63,7 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
         message: err.message,
@@ -72,47 +74,41 @@ app.use(function(err, req, res, next) {
 
 
 io.on('connection', function (socket) {
-    socket.on('wlsubmit', function(){
-        //var prefilter = spawn('python', ['../process/prefilter.py', '../files/watpad.tsv']);
-        //var filter = spawn('python', ['../process/filter-actions.py', './wh-dynam.txt']);
-        //var skip = spawn('ruby', ['../process/skip-gram.rb']);
-        //var count = spawn('python', ['../process/count-grams.py', '2']);
+    socket.on('wlsubmit', function () {
+        var linecount = 0,
+            filename = '../files/sample.tsv';
+        
+        exec('wc -l ' + filename, function (error, stdout, stderr) {
+            var s = stdout;
+            linecount = parseInt(stdout.trim().split(' ')[0]);
+            console.log(linecount);
+            socket.emit('count', linecount);
+            if (error !== null) {
+                console.log('exec error: ' + error);
+            }
+        });
 
-        var overview = spawn("sh", ["./overview.sh"])
-
-        /*
+        var prefilter = spawn('python', ['../process/prefilter.py', filename]),
+            filter = spawn('python', ['../process/filter-actions.py', './wh-dynam.txt']),
+            skip = spawn('python', ['../process/skip-gram.py']);
+        
         prefilter.stdout.on('data', function (data) {
-        filter.stdin.write(data);
+            filter.stdin.write(data);
         });
 
         filter.stdout.on('data', function (data) {
-        skip.stdin.write(data);
-        });
-
-        skip.stdout.on('data', function (data) {
-        //count.stdin.write(data);
-            data = data.toString('utf8')
-            socket.emit('res', data)
-            console.log(data)
-        });
-        
-        count.stderr.on('data', function (data) {
+            skip.stdin.write(data);
         });
 
         filter.stderr.on('data', function (data) {
-        console.log(data.toString('utf8'));
-        });
-        */
-
-        overview.stderr.on('data', function (data) {
             data = data.toString('utf8');
-            console.log(data)
-            socket.emit('err', data)    
+            console.log(data);
+            socket.emit('err', data);
         });
 
-        overview.stdout.on('data', function (data){
-            data = data.toString('utf8')
-            socket.emit('res', data)
-        })   
+        skip.stdout.on('data', function (data) {
+            data = data.toString('utf8');
+            socket.emit('res', data);
+        });
     });
 });
