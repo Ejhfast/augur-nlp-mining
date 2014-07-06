@@ -17,6 +17,9 @@ Remove this if you use the .htaccess -->
         <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
 
         <style>
+            ::-webkit-scrollbar { 
+    display: none; 
+}
             body, a, h1, h2, h3, h4, p {
                 font-family: 'Open Sans';
             }
@@ -63,10 +66,6 @@ Remove this if you use the .htaccess -->
 
             .card {
                 font-weight: 100;
-                width: 500px;
-                border: 3px solid #fff;
-                min-height: 300px;
-                margin-left: 100px;
             }
 
             #start, #end{
@@ -104,17 +103,12 @@ Remove this if you use the .htaccess -->
             .glyphicon-chevron-down{
                 font-size: 100px;
             }
-            #side1{
-                padding-top: 35px;
+            
+            #right{
+                height: 400px;
+                overflow-y: scroll;
             }
 
-            #side2{
-                background: #fff;
-                min-height: 300px;
-                color: deepskyblue;
-                font-size: 40px;
-                padding-top: 100px;
-            }
         </style>
         <script src="/socket.io/socket.io.js"></script>
     </head>
@@ -140,16 +134,6 @@ Remove this if you use the .htaccess -->
 
                     <div class = "col-md-7" id = "right">
                         <div id = "response">
-                            <div class="row card">
-                                <div class = "col-md-9" id = "side1">
-                                    <div id = "start">He goes shopping</div>
-                                    <span class="glyphicon glyphicon-chevron-down"></span>
-                                    <div id = "end">He comes home</div>
-                                </div>
-                                <div class = "col-md-3" id = "side2">
-                                    <div id =  "freq">20</div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -215,8 +199,7 @@ Remove this if you use the .htaccess -->
     dict = {}
     wordList = []
     var socket = io.connect('http://localhost');
-
-    function processData(data) {
+    function processData (data) {
         data = data.toString('utf8')
         spl = data.split('\n');
         c = spl.map(function(element) {
@@ -271,12 +254,14 @@ Remove this if you use the .htaccess -->
         $('#start').text(start);
         $('#end').text(end);
         $('#freq').text(freq);
+        $('#response').append('<div class="row card"><div id = "start">' + start + '</div><div id = "end">' + end + '</div><div id =  "freq">' + freq + '</div></div>');
     }
     
     function showCards(arr) {
+        $('#response').empty()
         arr.sort(compareByFreq);
         l = arr.length
-        for (var i = 0; i < Math.min(1, l); i++) {
+        for (var i = 0; i < Math.min(10, l); i++) {
             showCard(arr[i])
         }
         //arr.forEach(showCard);
@@ -295,6 +280,10 @@ Remove this if you use the .htaccess -->
         return false
     });
 
+    socket.on('doneerr', function(){
+        $('.progress-bar').css('width', 100 + '%').attr('aria-valuenow', 100);
+        $('#wl').slideToggle(400)
+    })
     socket.on('res', function(d2) {
         processData(d2)
         showCards(b)
