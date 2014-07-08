@@ -35,10 +35,15 @@ app.use('/main', routes);
 app.use('/users', users);
 app.post('/createwordlist', function (req, res) {
     var wordliststring = req.body.words.toString('utf8');
+    console.log(wordliststring)
     fs.writeFileSync("./wh-dynam.txt", wordliststring);
     console.log("The file was saved!");
     res.send(200);
 });
+app.use('/',function(req, res){
+    res.sendfile("./public/main.html")
+} )
+
 
 /// catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -75,6 +80,7 @@ app.use(function (err, req, res, next) {
 
 io.on('connection', function (socket) {
     socket.on('wlsubmit', function () {
+        
         var linecount = 0,
             filename = '../files/sample.tsv';
         
@@ -109,6 +115,23 @@ io.on('connection', function (socket) {
         skip.stdout.on('data', function (data) {
             data = data.toString('utf8');
             socket.emit('res', data);
+        });
+        
+        prefilter.on('close', function (data) {
+            filter.stdin.end();
+        });
+        
+        filter.on('close', function (data){
+            skip.stdin.end();
+        });
+        
+        skip.on('close', function (data) {
+            socket.emit('doneerr')
+        });
+        
+        socket.on('disconnect', function (socket) {
+            //todo : kill processes
+            console.log("disconnected");
         });
     });
 });
