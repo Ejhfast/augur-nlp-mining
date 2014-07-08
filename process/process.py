@@ -7,6 +7,7 @@ import itertools
 import sys
 import re
 import argparse
+import csv
 
 DEFAULT_INPUT = '../files/watpad.tsv'
 DEFAULT_WHITELIST = '../files/sampwhitelist.txt'
@@ -35,8 +36,7 @@ def pre_filter(iter):
 	def replace(s): return ' '.join(['he' if x in nameswords else x for x in s.split()])
 	for i, line in enumerate(iter):
 		if(i%100000==0): out_error("Processed " + str(i) + " lines.", False)
-		clean = line.decode("ascii", "ignore").rstrip()
-		yield [replace(c) for c in clean.split('\t')]
+		yield [replace(c) for c in line]
 
 # Filter for persons and objects
 def person_filter(iter):
@@ -78,11 +78,10 @@ def parse():
 	parser.add_argument('wl', nargs='?', type=argparse.FileType('r'), default=open(DEFAULT_WHITELIST))
 	return parser.parse_args()
 
-if __name__ == "__main__":
-	args = parse()
-	whitelist = set(args.wl.read().split())
+def processChunk(fd):
 	ticker, last_grams = 0, None
-	pipeline = count_grams(skip_grams(person_filter(pre_filter(args.input))))
+	reader = csv.reader(fd, delimiter ='\t')
+	pipeline = count_grams(skip_grams(person_filter(pre_filter(reader))))
 	for ngram_counts in pipeline:
 		ticker += 1
 		last_grams = ngram_counts
@@ -92,3 +91,10 @@ if __name__ == "__main__":
 
 	final_output = gram_list(last_grams,None)
 	print(final_output)
+
+if __name__ == "__main__":
+	csv.field_size_limit(sys.maxsize)
+	args = parse()
+	whitelist = set(args.wl.read().split())
+	processChunk(args.input)
+	
