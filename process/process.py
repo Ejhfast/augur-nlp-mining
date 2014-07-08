@@ -7,6 +7,7 @@ import itertools
 import sys
 import re
 
+
 # Adding the whitelist as a second argument screws up fileinput
 with open("../files/sampwhitelist.txt") as file:
   whitelist = set(file.read().split())
@@ -19,7 +20,6 @@ def each_cons(xs, n):
   return itertools.izip(*(itertools.islice(g, i, None) for i, g in enumerate(itertools.tee(xs, n))))
 def status(i):
   if (i%100000==0):
-    sys.stderr.write("\x1b[2J\x1b[H")
     print("Processed " + str(i) + " items.", file=sys.stderr)
 def gram_list(counts,n):
   top = sorted(counts.iteritems(), key=operator.itemgetter(1), reverse=True)
@@ -78,15 +78,16 @@ def count_grams(iter):
     counts["\t".join(n_gram)] += 1
     yield counts
 
-ticker, last_grams = 0, None
-pipeline = count_grams(skip_grams(person_filter(pre_filter(fileinput.input()))))
-for counts in pipeline:
-  ticker += 1
-  last_grams = counts
-  if(ticker%1000==0):
-    display = gram_list(counts,50)
-    sys.stderr.write("\x1b[2J\x1b[H")
-    print(display, file=sys.stderr)
+if __name__ == "__main__":
+	ticker, last_grams = 0, None
+	pipeline = count_grams(skip_grams(person_filter(pre_filter(fileinput.input()))))
+	for counts in pipeline:
+	  ticker += 1
+	  last_grams = counts
+	  if(ticker%1000==0):
+	    display = gram_list(counts,50)
+	    sys.stderr.write("\x1b[2J\x1b[H")
+	    print(display, file=sys.stderr)
 
-final_output = gram_list(last_grams,None)
-print(final_output)
+	final_output = gram_list(last_grams,None)
+	print(final_output)
