@@ -6,10 +6,7 @@ import fileinput
 import itertools
 import sys
 import re
-
-# Adding the whitelist as a second argument screws up fileinput
-with open("../files/sampwhitelist.txt") as file:
-  whitelist = set(file.read().split())
+import argparse
 
 def check_whitelist(action_str):
   return len(whitelist.intersection(action_str.split())) > 0
@@ -72,14 +69,18 @@ def count_grams(iter):
     yield counts
 
 if __name__ == "__main__":
+	parser = argparse.ArgumentParser()
+	parser.add_argument('input', nargs='?', type=argparse.FileType('r'), default=open('../files/watpad.tsv'))
+	parser.add_argument('whitelist', nargs='?', type=argparse.FileType('r'), default=open('../files/sampwhitelist.txt'))
+	args = parser.parse_args()
 	ticker, last_grams = 0, None
-	pipeline = count_grams(skip_grams(person_filter(pre_filter(fileinput.input()))))
+	whitelist = set(args.whitelist.read().split());
+	pipeline = count_grams(skip_grams(person_filter(pre_filter(args.input))))
 	for ngram_counts in pipeline:
-	  ticker += 1
-	  last_grams = ngram_counts
-	  if(ticker%1000==0):
-	    display = gram_list(ngram_counts,50)
-	    out_error(display)
-
+  		ticker += 1
+	  	last_grams = ngram_counts
+	  	if(ticker%1000==0):
+	  		display = gram_list(ngram_counts,50)
+	  		out_error(display)
 	final_output = gram_list(last_grams,None)
 	print(final_output)
