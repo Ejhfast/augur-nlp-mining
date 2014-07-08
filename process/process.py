@@ -8,15 +8,19 @@ import sys
 import re
 
 # Adding the whitelist as a second argument screws up fileinput
-with open("../files/sampwhitelist.txt") as file:
+with open("lunch_whitelist.txt") as file:
   whitelist = set(file.read().split())
 
-def check_whitelist(action_str):
-  return len(whitelist.intersection(action_str.split())) > 0
+def check_whitelist(actions):
+  return len(whitelist.intersection(" ".join(actions).split())) > 0
 
 # Utils
 def each_cons(xs, n):
   return itertools.izip(*(itertools.islice(g, i, None) for i, g in enumerate(itertools.tee(xs, n))))
+def interleave(item,ls): return sum(([item,i] for i in ls), ls[0:1])
+def n_filters(filters,stream):
+  for f in filters: stream = itertools.ifilter(f,stream)
+  for i in stream: yield i
 def out_error(string): sys.stderr.write("\x1b[2J\x1b[H" + string)
 def gram_list(counts,n):
   top = sorted(counts.iteritems(), key=operator.itemgetter(1), reverse=True)
@@ -45,22 +49,19 @@ def person_filter(iter):
     return all([subject_match(actions), object_match(actions)])
   for group in each_cons(iter, 2):
     count += 1
-    if(all([approve(a) for a in group])):
-      no_subjects = [" ".join(a[1:]) for a in group]
-      if(any([check_whitelist(" ".join(a)) for a in group])):
-        with_nops = "\tNOP 0\t".join(no_subjects).split("\t") # SO hacky...
-        yield "NOP {}".format(count)
-        for item in with_nops: yield item
-        count = 0
+    if(all([approve(a) for a in group]) & any([check_whitelist(a) for a in group])):
+      count = 0
+      wrap = [dict(kind="ACTION",value=" ".join(a[1:])) for x in group]
+      with_nops = [dict(kind="NOP",value=count)] + interleave(dict(kind="NOP",value=0), wrap)
+      for wrapped_item in with_nops: yield wrapped_item
 
 def skip_grams(iter):
   n, skip = 2, 10
-  for grp in each_cons(iter, 2*(n-1)+1):
-    if not re.search("NOP", grp[0]):
-      parsed = [int(i.split(" ")[-1]) if re.search("NOP",i) else i for i in grp]
-      if reduce(operator.and_, [x < skip for x in parsed if isinstance(x,int)]):
-        just_strings = [x for x in parsed if not isinstance(x,int)]
-        if len(set(just_strings)) > 1: yield just_strings
+  def action_first(seq): return seq[0]["kind"] == "ACTION" # We want: A -> NOP -> A ...
+  def skip_check(seq): return reduce(operator.and_, [x["value"] < skip for x in seq if x["kind"] == "NOP"])
+  for grp in n_filters([action_first,skip_check], each_cons(iter, 2*(n-1)+1)):
+    just_strings = [x["value"] for x in grp if x["kind"] == "ACTION"]
+    if len(set(just_strings)) > 1: yield just_strings
 
 def count_grams(iter):
   counts = defaultdict(int)
@@ -74,7 +75,7 @@ for ngram_counts in pipeline:
   ticker += 1
   last_grams = ngram_counts
   if(ticker%1000==0):
-    display = gram_list(ngram_counts,50)
+    display = gram_list(ngram_counts,20)
     out_error(display)
 
 final_output = gram_list(last_grams,None)
