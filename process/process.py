@@ -8,8 +8,9 @@ import sys
 import re
 
 # Adding the whitelist as a second argument screws up fileinput
-with open("lunch_whitelist.txt") as file:
+with open(sys.argv[-1]) as file:
   whitelist = set(file.read().split())
+del sys.argv[-1] # remove for fileinput
 
 def check_whitelist(actions):
   return len(whitelist.intersection(" ".join(actions).split())) > 0
