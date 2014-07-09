@@ -8,12 +8,16 @@ import sys
 import re
 import argparse
 import csv
+import multiprocessing as mp
+import subprocess
+
 
 DEFAULT_INPUT = '../files/watpad.tsv'
 DEFAULT_WHITELIST = '../files/sampwhitelist.txt'
 
 def check_whitelist(actions):
 	return len(whitelist.intersection(" ".join(actions).split())) > 0
+
 
 # Utils
 def each_cons(xs, n):
@@ -74,13 +78,14 @@ def count_grams(iter):
 
 def parse():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('input', nargs='?', type=argparse.FileType('r'), default=open(DEFAULT_INPUT))
+	#parser.add_argument('input', nargs='?', type=argparse.FileType('r'), default=open(DEFAULT_INPUT))
 	parser.add_argument('wl', nargs='?', type=argparse.FileType('r'), default=open(DEFAULT_WHITELIST))
 	return parser.parse_args()
 
-def processChunk(fd):
+def processChunk(filename, start, end):
+	mylines = itertools.islice(open(filename), start, end)
 	ticker, last_grams = 0, None
-	reader = csv.reader(fd, delimiter ='\t')
+	reader = csv.reader(mylines, delimiter ='\t')
 	pipeline = count_grams(skip_grams(person_filter(pre_filter(reader))))
 	for ngram_counts in pipeline:
 		ticker += 1
@@ -88,13 +93,24 @@ def processChunk(fd):
 		if(ticker%1000==0):
 			display = gram_list(ngram_counts,20)
 			out_error(display)
-
 	final_output = gram_list(last_grams,None)
 	print(final_output)
+
+def processAll(filename):
+	pool = mp.Pool(mp.cpu_count())
+	num_segments = mp.cpu_count()
+	total_size = 1000000
+	segment_size = int(total_size/num_segments);
+	print(segment_size, num_segments)
+	total = []
+	for i in xrange(num_segments):
+		pool.apply_async(processChunk, [filename, segment_size*i, segment_size*(i+1)])
+	pool.close()
+	pool.join()
+
 
 if __name__ == "__main__":
 	csv.field_size_limit(sys.maxsize)
 	args = parse()
 	whitelist = set(args.wl.read().split())
-	processChunk(args.input)
-	
+	processAll('../files/watpad-small.tsv')
