@@ -77,7 +77,7 @@ def count_grams(iter):
 
 def parse():
 	parser = argparse.ArgumentParser()
-	#parser.add_argument('input', nargs='?', type=argparse.FileType('r'), default=open(DEFAULT_INPUT))
+	parser.add_argument('input', nargs='?', default =DEFAULT_INPUT)
 	parser.add_argument('wl', nargs='?', type=argparse.FileType('r'), default=open(DEFAULT_WHITELIST))
 	return parser.parse_args()
 
@@ -111,4 +111,4 @@ if __name__ == "__main__":
 	csv.field_size_limit(sys.maxsize)
 	args = parse()
 	whitelist = set(args.wl.read().split())
-	processAll('../files/watpad-small.tsv')
+	processAll(args.input)
