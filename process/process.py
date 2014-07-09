@@ -18,7 +18,6 @@ DEFAULT_WHITELIST = '../files/sampwhitelist.txt'
 def check_whitelist(actions):
 	return len(whitelist.intersection(" ".join(actions).split())) > 0
 
-
 # Utils
 def each_cons(xs, n):
 	return itertools.izip(*(itertools.islice(g, i, None) for i, g in enumerate(itertools.tee(xs, n))))
@@ -99,7 +98,7 @@ def processChunk(filename, start, end):
 def processAll(filename):
 	pool = mp.Pool(mp.cpu_count())
 	num_segments = mp.cpu_count()
-	total_size = 1000000
+	total_size = int(subprocess.check_output('wc -l ' + filename, shell=True).rstrip().split()[0])
 	segment_size = int(total_size/num_segments);
 	print(segment_size, num_segments)
 	total = []
@@ -107,7 +106,6 @@ def processAll(filename):
 		pool.apply_async(processChunk, [filename, segment_size*i, segment_size*(i+1)])
 	pool.close()
 	pool.join()
-
 
 if __name__ == "__main__":
 	csv.field_size_limit(sys.maxsize)
