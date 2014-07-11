@@ -8,41 +8,38 @@
 
     var socket = io.connect('http://localhost');
 
-    function compareByFreq(a, b) {
-        if (a.frequency < b.frequency) {
-            return 1;
-        }
-        if (a.frequency > b.frequency) {
-            return -1;
-        }
-        return 0;
-    }
 
-    function showCards(arr) {
-        $('#response').empty();
-        arr.sort(compareByFreq);
-        for (var i = 0; i < Math.min(100, arr.length); i++) {
-            showCard(arr[i]);
-        }
-    }
 
-    function showCard(obj) {
-        var start = obj.start, end = obj.end, freq = obj.frequency, words = JSON.stringify(obj.words);
-        $('#start').text(start);
-        $('#end').text(end);
-        $('#freq').text(freq);
+    function showCard(r) {
+        var start = r.start, end = r.end, freq = r.frequency, words = JSON.stringify(r.words);
         $('#response').append('<div class="row card"><div id = "start">' + start + '</div><div id = "end">' + end + '</div><div id =  "freq">' + freq + '</div></div>');
     }
 
+	
+    function showCards(a) {
+        $('#response').empty();
+        for (var j = 0; j < Math.min(100, a.length); j++) {
+        	showCard(a[j]);
+        }
+    }
     var process = function () {
         var b = [], wordList = [];
-
+		
+		function compareByFreq(a, b) {
+			if (a.frequency < b.frequency) {
+				return 1;
+			}
+			if (a.frequency > b.frequency) {
+				return -1;
+			}
+			return 0;
+		}
         return {
             saveWordList: function () {
                 wordList = $('#words').val().toString('utf8').split(' ');
             },
             getArray: function () {
-                return b;
+                return b.sort(compareByFreq);
             },
             getWordList: function () {
                 return wordList;
@@ -52,10 +49,10 @@
                 var c = spl.map(function (element) {
                     var a = {};
                     var actions = element.split('\t');
-                    if (actions.length === 2) {
+                    if (actions.length === 3) {
                         a.start = actions[0];
                         a.end = actions[1];
-                        a.frequency = 1;
+                        a.frequency = parseInt(actions[2]);
                         var a2 = (a.start + " " + a.end).split(' ');
                         var chosen = wordList.filter(function (n) {
                             return a2.indexOf(n) !== -1;
@@ -71,7 +68,7 @@
                     for (var i = 0; i < b.length; i++) {
                         var element2 = b[i];
                         if ((element1.start === element2.start) && (element1.end === element2.end)) {
-                            element2.frequency += 1;
+                            b[i].frequency += element1.frequency;
                             return false;
                         }
                     }
@@ -114,10 +111,11 @@
     socket.on('doneerr', function () {
         $('.progress-bar').css('width', 100 + '%').attr('aria-valuenow', 100);
         $('#wl').slideToggle(400);
+		showCards(p1.getArray());
     });
     
     socket.on('res', function (data) {
         p1.processData(data);
-        showCards(p1.getArray());
+		showCards(p1.getArray());
     });
 }($,io,window));
