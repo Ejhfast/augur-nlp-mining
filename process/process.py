@@ -14,6 +14,7 @@ import subprocess
 
 DEFAULT_INPUT = '../files/watpad.tsv'
 DEFAULT_WHITELIST = '../files/sampwhitelist.txt'
+nowhitelist = False
 
 def check_whitelist(actions):
 	return len(whitelist.intersection(" ".join(actions).split())) > 0
@@ -55,7 +56,7 @@ def person_filter(iter):
 		return all([subject_match(actions), object_match(actions)])
 	for group in each_cons(iter, 2):
 		count += 1
-		if(all([approve(a) for a in group]) & any([check_whitelist(a) for a in group])):
+		if(all([approve(a) for a in group]) & (nowhitelist or any([check_whitelist(a) for a in group]))):
 			count = 0
 			wrap = [dict(kind="ACTION",value=" ".join(a[1:])) for x in group]
 			with_nops = [dict(kind="NOP",value=count)] + interleave(dict(kind="NOP",value=0), wrap)
@@ -79,6 +80,7 @@ def parse():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('input', nargs='?', default =DEFAULT_INPUT)
 	parser.add_argument('wl', nargs='?', type=argparse.FileType('r'), default=open(DEFAULT_WHITELIST))
+	parser.add_argument('--nowhitelist', action='store_true')
 	return parser.parse_args()
 
 def processChunk(filename, start, end):
@@ -86,12 +88,7 @@ def processChunk(filename, start, end):
 	ticker, last_grams = 0, None
 	reader = csv.reader(mylines, delimiter ='\t', quoting=csv.QUOTE_NONE)
 	pipeline = count_grams(skip_grams(person_filter(pre_filter(reader))))
-	for ngram_counts in pipeline:
-		ticker += 1
-		last_grams = ngram_counts
-		if(ticker%1000==0):
-			display = gram_list(ngram_counts,20)
-			out_error(display)
+	for ngram_counts in pipeline: last_grams = ngram_counts
 	final_output = gram_list(last_grams,None)
 	print(final_output)
 
@@ -109,5 +106,6 @@ def processAll(filename):
 if __name__ == "__main__":
 	csv.field_size_limit(sys.maxsize)
 	args = parse()
+	nowhitelist = args.nowhitelist
 	whitelist = set(args.wl.read().split())
 	processAll(args.input)
