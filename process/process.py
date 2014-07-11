@@ -31,15 +31,15 @@ def out_error(string, clear=True):
 		sys.stderr.write("\x1b[2J\x1b[H")
 	print(string, file=sys.stderr)
 def gram_list(counts,n):
-	top = sorted(counts.iteritems(), key=operator.itemgetter(1), reverse=True)
-	return "\n".join([k+"\t"+str(v) for k,v in itertools.islice(top,0,n)])
+	return "\n".join([k+"\t"+str(v) for k,v in itertools.islice(counts.iteritems(),0,n)])
 
 # Replace names
 def pre_filter(iter):
 	nameswords = set([word.lower() for word in names.words()])
 	def replace(s): return ' '.join(['he' if x in nameswords else x for x in s.split()])
 	for i, line in enumerate(iter):
-		if(i%100000==0): out_error("Processed " + str(i) + " lines.", False)
+		if (i%100000==0) and str(mp.current_process().name.strip()) == "PoolWorker-1": 
+			out_error("Processed " + str(i*mp.cpu_count()) + " lines.", False)
 		yield [replace(c) for c in line]
 
 # Filter for persons and objects
@@ -88,8 +88,9 @@ def processChunk(filename, start, end):
 	ticker, last_grams = 0, None
 	reader = csv.reader(mylines, delimiter ='\t', quoting=csv.QUOTE_NONE)
 	pipeline = count_grams(skip_grams(person_filter(pre_filter(reader))))
-	for ngram_counts in pipeline: last_grams = ngram_counts
-	final_output = gram_list(last_grams,None)
+	for last in pipeline: 
+		pass		
+	final_output = gram_list(last,None)
 	print(final_output)
 
 def processAll(filename):
