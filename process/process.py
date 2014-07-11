@@ -84,7 +84,7 @@ def parse():
 def processChunk(filename, start, end):
 	mylines = itertools.islice(open(filename), start, end)
 	ticker, last_grams = 0, None
-	reader = csv.reader(mylines, delimiter ='\t')
+	reader = csv.reader(mylines, delimiter ='\t', quoting=csv.QUOTE_NONE)
 	pipeline = count_grams(skip_grams(person_filter(pre_filter(reader))))
 	for ngram_counts in pipeline:
 		ticker += 1
@@ -100,7 +100,6 @@ def processAll(filename):
 	num_segments = mp.cpu_count()
 	total_size = int(subprocess.check_output('wc -l ' + filename, shell=True).rstrip().split()[0])
 	segment_size = int(total_size/num_segments);
-	print(segment_size, num_segments)
 	total = []
 	for i in xrange(num_segments):
 		pool.apply_async(processChunk, [filename, segment_size*i, segment_size*(i+1)])
