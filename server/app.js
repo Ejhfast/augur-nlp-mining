@@ -41,7 +41,7 @@ app.post('/createwordlist', function (req, res) {
     res.send(200);
 });
 app.use('/',function(req, res){
-    res.sendfile("./public/main.html")
+    res.render('main')
 } )
 
 
@@ -93,44 +93,23 @@ io.on('connection', function (socket) {
                 console.log('exec error: ' + error);
             }
         });
+        var process = spawn('python', ['../process/process.py', filename, './wh-dynam.txt']);
 
-        var prefilter = spawn('python', ['../process/prefilter.py', filename]),
-            filter = spawn('python', ['../process/filter-actions.py', './wh-dynam.txt']),
-            skip = spawn('python', ['../process/skip-gram.py']);
-        
-        prefilter.stdout.on('data', function (data) {
-            filter.stdin.write(data);
+        process.stdout.on('data', function (data) {
+            data = data.toString('utf8');
+            socket.emit('res', data);
         });
 
-        filter.stdout.on('data', function (data) {
-            skip.stdin.write(data);
-        });
-
-        filter.stderr.on('data', function (data) {
+        process.stderr.on('data', function (data){
             data = data.toString('utf8');
             console.log(data);
             socket.emit('err', data);
         });
-
-        skip.stdout.on('data', function (data) {
-            data = data.toString('utf8');
-            socket.emit('res', data);
-        });
         
-        prefilter.on('close', function (data) {
-            filter.stdin.end();
+        process.on('close', function (data){
+            socket.emit('doneerr');
         });
-        
-        filter.on('close', function (data){
-            skip.stdin.end();
-        });
-        
-        skip.on('close', function (data) {
-            socket.emit('doneerr')
-        });
-        
-        socket.on('disconnect', function (socket) {
-            //todo : kill processes
+        socket .on('disconnect', function (socket) {
             console.log("disconnected");
         });
     });
