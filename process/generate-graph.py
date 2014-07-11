@@ -1,9 +1,9 @@
 from collections import defaultdict
 import pprint
+import fileinput
 
 a = defaultdict(dict)
-p =open("process-output.txt", 'r')
-for line in p:
+for line in fileinput.input():
 	token  = line.rstrip().split('\t')
 	if len(token) != 3:
 		continue
