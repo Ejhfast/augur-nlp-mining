@@ -1,4 +1,4 @@
-(function () {
+(function ($,io, window) {
     'use strict';
     // this function is strict...
 
@@ -21,8 +21,8 @@
     function showCards(arr) {
         $('#response').empty();
         arr.sort(compareByFreq);
-        for (var i = 0; i < Math.min(10, arr.length); i++) {
-            showCard(arr[i])
+        for (var i = 0; i < Math.min(100, arr.length); i++) {
+            showCard(arr[i]);
         }
     }
 
@@ -68,12 +68,11 @@
                     return n !== undefined;
                 });
                 c = c.filter(function (element1) {
-                    var keep = true;
                     for (var i = 0; i < b.length; i++) {
                         var element2 = b[i];
-                        if ((element.start === element2.start) && (element1.end === element2.end)) {
+                        if ((element1.start === element2.start) && (element1.end === element2.end)) {
                             element2.frequency += 1;
-                            return false
+                            return false;
                         }
                     }
                     return true;
@@ -84,7 +83,7 @@
     };
 
     var p1;
-    $('#wl').submit(function (event) {
+    $('#wl').submit(function () {
         $('.progress-bar').css('width', 0 + '%').attr('aria-valuenow', 0);
         $('#wl').slideToggle(400);
 
@@ -121,4 +120,4 @@
         p1.processData(data);
         showCards(p1.getArray());
     });
-}());
+}($,io,window));
