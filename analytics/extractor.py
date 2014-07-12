@@ -20,22 +20,12 @@ def out_error(string, clear=True):
 	if clear: sys.stderr.write("\x1b[2J\x1b[H")
 	print(string, file=sys.stderr)
 
-nouns = filter(lambda x: x[1] == "N", nltk.corpus.brown.tagged_words(simplify_tags=True))
-nouns = set([w[0].lower() for w in nouns])
-
-print(nouns)
-# blacklist = defaultdict(bool)
-# with open('blacklist.tsv','r') as bl:
-#   for line in bl:
-#     word, c = line.rstrip().split("\t")
-#     blacklist[word.rstrip()] = True
-
 # path -> files
 def list_files(path):
   f_count = 0
   for file in glob.glob(path+"/*"):
     f_count += 1
-    if(f_count%1==0): out_error("{} files".format(f_count))
+    if(f_count%1000==0): out_error("{} files".format(f_count))
     yield file
 
 # file -> line
@@ -46,15 +36,22 @@ def iter_lines(iter):
 
 # line -> words
 def iter_words(iter):
+  articles = set(["a", "the", "an"])
   for line in iter:
     for w in line.rstrip().split():
-      yield w.lower()
+      if(not w in articles): yield w.lower()
+
+def n_grams(n):
+  def over(iter):
+    for seq in each_cons(iter,n):
+      yield seq
+  return over
 
 # hashable item -> table
 def count_items(iter):
   table = defaultdict(int)
   for i in iter:
-    table[i] += 1
+    table["\t".join(i)] += 1
     yield table
 
 # lines -> [words] in lines with that contain word_set items
@@ -71,13 +68,13 @@ def word_window(word_set):
 
 test_set = set(["plate","fork","napkin","chair"])
 
-pipeline = pipe([iter_lines, word_window(test_set), count_items], list_files(sys.argv[1]))
+pipeline = pipe([iter_lines, iter_words, n_grams(3), count_items], list_files(sys.argv[1]))
 
 count, last_count = 0, None
 for res in pipeline:
   count += 1
   last_count = res
-  if(count%10==0):
+  if(count%100000==0):
     window = print_dict(res,50)
     out_error(window)
 print(print_dict(last_count,None))
