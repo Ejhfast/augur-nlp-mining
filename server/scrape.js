@@ -54,7 +54,7 @@ function getObjects($){
 	var objects = [];
 	$('body').each(function(){
 		var object = getObject(this);
-		objects.push(object);
+		if(object.title !== undefined) objects.push(object);
 	});
 	return objects;
 }
