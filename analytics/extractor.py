@@ -53,8 +53,15 @@ def iter_words(iter):
 def n_grams(n):
   def over(iter):
     for seq in each_cons(iter,n):
-      yield seq
+      if(len(set(seq)) > 1):
+        yield seq
   return over
+
+def filter_words(words):
+  def filtered(iter):
+    for w in iter:
+      if(w in words): yield w
+  return filtered
 
 # hashable item -> table
 def count_items(iter):
@@ -75,10 +82,17 @@ def has_words(words):
       #   yield word_seq
   return window
 
-BLOCK_SIZE = 1000
+BLOCK_SIZE = 5000
+
+past_verbs = filter(lambda x: x[1] == "VD", nltk.corpus.brown.tagged_words(simplify_tags=True))
+past_verbs = set([x[0].lower() for x in past_verbs])
+remove_verbs = set(["said","got","let","told","thought","knew","went","saw","looked","made","put","turned","seemed","came","though","felt"])
+add_verbs = set(["texted","emailed"])
+
+words = past_verbs.difference(remove_verbs).union(add_verbs) #set(["put","sliced","dropped","dipped","cut","chopped","invited","went","shared","hated","replaced","needed","left","opened","joked","read","typed","bought","purchased","gifted","loved","hurt","swore","asked","begged","called","texted","messaged","emailed","contacted","wore","dressed","flexed","agreed","led","angered","pleaded","ran","cried","killed","murdered","fell","slipped","joined","passed","followed","ate","slept","found","discovered","enjoyed","liked","wanted","walked","sat","rested"])
 
 def pipeline(i,file_list):
-  process = pipe([iter_lines, iter_words, n_grams(3), count_items], file_list)
+  process = pipe([iter_lines, iter_words, filter_words(words), n_grams(2), count_items], file_list)
   inter_res = None
   for inter_res in process: pass
   out_error("Finished through: {}".format(i*BLOCK_SIZE))
