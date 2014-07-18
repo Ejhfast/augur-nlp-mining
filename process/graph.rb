@@ -3,7 +3,32 @@
 
 require 'json'
 
-bigrams = IO.read(ARGV[0]).split("\n").map { |x| x.split("\t").take(2).map{ |x| x.gsub("the person","") } }
+def blacklist(grp)
+  no = ["looked","said"]
+  no.each do |bad|
+    if(grp[0] == bad || grp[1] == bad)
+      return true
+    end
+  end
+  return false
+end
+
+count_hash = Hash.new { |h,k| h[k] = [] }
+raw = IO.read(ARGV[0]).split("\n").map { |x| x.split("\t").map { |x| x.strip } }
+raw.each do |grp|
+  count_hash[grp[0]].push([grp[1],grp[2].to_i]) if grp[2].to_i > 5 && (!blacklist(grp))
+end
+bigrams = []
+count_hash.default = nil
+d = Marshal.load(Marshal.dump(count_hash))
+count_hash.each do |k,v|
+  best = v.sort_by{ |x| (x[1] * -1).to_f / (d[x[0]] ? d[x[0]].size : 1)  }.take(1).map { |x| x[0] }
+  best.each do |k2|
+    bigrams.push([k,k2])
+  end
+end
+
+#bigrams = IO.read(ARGV[0]).split("\n").select{ |x| x.split("\t").last.to_i > 50 && x.split("\t").last.to_i < 200  }.map { |x| x.split("\t").take(2).map{ |x| x.gsub("the person","") } }
 
 mapping = Hash.new { |h,k| h[k] = [] }
 bigrams.each { |gram| mapping[gram[0]].push(gram[1]) }
