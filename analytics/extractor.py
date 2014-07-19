@@ -1,5 +1,6 @@
 from __future__ import print_function
 from collections import defaultdict, Counter, deque
+from nltk.corpus import wordnet as wn
 import multiprocessing as mp
 import nltk
 import fileinput
@@ -23,6 +24,13 @@ def grouper(n, iterable, fillvalue=None):
 def out_error(string, clear=True):
 	if clear: sys.stderr.write("\x1b[2J\x1b[H")
 	print(string, file=sys.stderr)
+def isObject(x):
+  if(wn.morphy(x, wn.NOUN) == None): return False
+  sn  = wn.synsets(wn.morphy(x, wn.NOUN))
+  if(len(sn) == 0): return False
+  if sn[0].common_hypernyms(wn.synset('object.n.01'))[0].name == 'object.n.01':
+    return True
+  return False
 
 # path -> files
 def list_files(path):
@@ -38,10 +46,6 @@ def iter_lines(iter):
     if file: # Stupid None from grouper...
       with open(file,"r") as f:
         for line in f: yield line
-
-def iter_lines_single(file):
-  with open(file,"r") as f:
-    for line in f: yield line
 
 # line -> words
 def iter_words(iter):
@@ -61,6 +65,13 @@ def filter_words(words):
   def filtered(iter):
     for w in iter:
       if(w in words): yield w
+  return filtered
+
+def filter_words_2():
+  def filtered(iter):
+    for w in iter:
+      if w:
+        if isObject(w): yield w
   return filtered
 
 # hashable item -> table
@@ -92,14 +103,13 @@ add_verbs = set(["texted","emailed"])
 words = past_verbs.difference(remove_verbs).union(add_verbs) #set(["put","sliced","dropped","dipped","cut","chopped","invited","went","shared","hated","replaced","needed","left","opened","joked","read","typed","bought","purchased","gifted","loved","hurt","swore","asked","begged","called","texted","messaged","emailed","contacted","wore","dressed","flexed","agreed","led","angered","pleaded","ran","cried","killed","murdered","fell","slipped","joined","passed","followed","ate","slept","found","discovered","enjoyed","liked","wanted","walked","sat","rested"])
 
 def pipeline(i,file_list):
-  process = pipe([iter_lines, iter_words, filter_words(words), n_grams(2), count_items], file_list)
+  process = pipe([iter_lines, iter_words, filter_words_2(), n_grams(2), count_items], file_list)
   inter_res = None
   for inter_res in process: pass
-  out_error("Finished through: {}".format(i*BLOCK_SIZE))
   return inter_res
 
 def list_files_multi(path):
-  pool = mp.Pool(processes=4)
+  pool = mp.Pool(mp.cpu_count())
   file_blocks = grouper(BLOCK_SIZE,list_files(path))
   dicts = [pool.apply_async(pipeline, args=(i,f_seq)) for i,f_seq in enumerate(file_blocks)]
   out = [p.get() for p in dicts]
@@ -111,4 +121,5 @@ def list_files_multi(path):
       for k,v in d.iteritems(): final[k] += v
   print(print_dict(final,None))
 
-list_files_multi(sys.argv[1])
+if __name__ == '__main__':
+  list_files_multi(sys.argv[1])
