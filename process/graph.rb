@@ -4,8 +4,9 @@
 require 'json'
 
 def blacklist(grp)
-  no = ["looked","said"]
-  no.each do |bad|
+  no_verb = no = ["looked","said"]
+  no_noun = ["was","me","more","front","here","there","or","have","down","see","can", "de", "still", "felt", "us", "left", "has", "tell", "man"]
+  no_noun.each do |bad|
     if(grp[0] == bad || grp[1] == bad)
       return true
     end
@@ -18,6 +19,7 @@ raw = IO.read(ARGV[0]).split("\n").map { |x| x.split("\t").map { |x| x.strip } }
 raw.each do |grp|
   count_hash[grp[0]].push([grp[1],grp[2].to_i]) if grp[2].to_i > 5 && (!blacklist(grp))
 end
+#to normalize, divide weight by this: / (d[x[0]] ? d[x[0]].size : 1)
 bigrams = []
 count_hash.default = nil
 d = Marshal.load(Marshal.dump(count_hash))
