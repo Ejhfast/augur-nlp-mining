@@ -1,3 +1,4 @@
+/* scrapes a wikihow how-to page */
 var cheerio = require('cheerio');
 var request = require('request');
 var fs = require('fs');
@@ -85,4 +86,7 @@ function downloadPages(){
 	});
 }
 
-extractHowToPage('alot.html');
+if (require.main === module) {
+    extractHowToPage(process.argv[2]);
+}
+
