@@ -40,9 +40,13 @@ app.post('/createwordlist', function (req, res) {
     console.log("The file was saved!");
     res.send(200);
 });
+app.use('/graph', function(req,res){
+    res.render('graph')
+});
 app.use('/',function(req, res){
-    res.render('main')
-} )
+    res.render('main');
+} );
+
 
 
 /// catch 404 and forward to error handler
