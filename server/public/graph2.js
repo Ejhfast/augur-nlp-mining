@@ -1,6 +1,6 @@
 (function($){
 
-  var files = ["./verb-object.json"]
+  var files1 = ["./objects-pos-sorted.json", "./objects-pos.json", "./objects-unnormalized.json", "verb-object.json"]
 
   for(var i =0; i <files.length; i++){
     (function(i, $){
@@ -56,16 +56,17 @@
       var width = 640,
       height = 480;
 
-      var color = d3.scale.category10();
+      var color = d3.scale.category20();
 
       var force = d3.layout.force()
-      .linkDistance(20)
+      .linkDistance(15)
       .linkStrength(2)
       .gravity(.005)
-      .charge(-260)
-      .chargeDistance(600)
+      .charge(-50)
+      .chargeDistance(400)
       .theta(0.5)
       .size([width, height]);
+
 
       var svg = d3.select($('.inner')[$('.inner').length-1]).append("svg")
       .append("g")
@@ -118,15 +119,6 @@
       */
       var labels = gnodes.append("text")
       .attr('class', 'text')
-      .attr('class', function(d){ return d.type})
-      .style("fill", function(d) {
-      	if(d.type === "O"){
-      		return "#ff7f0e";
-      	}else{
-      		return "#d62728";
-      	}
-
-      } )
       .text(function(d) { return d.name; });
 
       force.on("tick", function() {
