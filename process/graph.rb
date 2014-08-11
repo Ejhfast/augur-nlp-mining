@@ -12,17 +12,16 @@ def blacklist(grp)
   end
   return false
 end
-
 count_hash = Hash.new { |h,k| h[k] = [] }
 raw = IO.read(ARGV[0]).split("\n").map { |x| x.split("\t").map { |x| x.strip } }
 raw.each do |grp|
-  count_hash[grp[0]].push([grp[1],grp[2].to_i]) if grp[2].to_i > 5 && (!blacklist(grp))
+  count_hash[grp[0]].push([grp[1],grp[2].to_i]) if grp[2].to_i > 10 && (!blacklist(grp))
 end
 bigrams = []
 count_hash.default = nil
 d = Marshal.load(Marshal.dump(count_hash))
 count_hash.each do |k,v|
-  best = v.sort_by{ |x| (x[1] * -1).to_f / (d[x[0]] ? d[x[0]].size : 1)  }.take(1).map { |x| x[0] }
+  best = v.sort_by{ |x| (x[1] * -1).to_f/(d[x[0]] ? d[x[0]].size : 1) }.take(1).map { |x| x[0] }
   best.each do |k2|
     bigrams.push([k,k2])
   end
@@ -34,7 +33,27 @@ mapping = Hash.new { |h,k| h[k] = [] }
 bigrams.each { |gram| mapping[gram[0]].push(gram[1]) }
 
 uniq_grams = bigrams.reduce(:+).uniq
-
+#uniq_grams.each { |x| puts x }
+# bigrams.each do |gram|
+#   puts "#{gram[0]}\t#{gram[1]}"
+# end
+# tick = 0
+# while tick < 500
+#   n = 3
+#   group = []
+#   count = 0
+#   curr = mapping.keys.sample
+#   group.push(curr)
+#   while count < n && !mapping[curr].empty?
+#     curr = mapping[curr].sample
+#     group.push(curr) if !group.include?(curr)
+#     count += 1
+#   end
+#   if group.size == n
+#     puts group.join("\t")
+#     tick += 1
+#   end
+# end
 nodes = []
 edges = []
 index_track = {}

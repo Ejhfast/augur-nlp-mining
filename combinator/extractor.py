@@ -3,24 +3,25 @@ from collections import defaultdict, Counter, deque
 import multiprocessing as mp
 import nltk
 from nltk.corpus import wordnet as wn
+from nltk.stem.wordnet import WordNetLemmatizer
 import fileinput
 import itertools
 import operator
 import glob
 import sys
+from combinator import *
 
 #Global hashes
 is_object_dict = defaultdict(tuple)
 is_action_dict = defaultdict(tuple)
+lemma_cache = {}
+
+lmtzr = WordNetLemmatizer()
 
 # Utils
 def pipe(gens,stream):
   for g in gens: stream = g(stream)
   for i in stream: yield i
-def or_g(f1,f2,stream):
-  s1 = f1(stream)
-  s2 = f2(stream)
-
 def each_cons(xs, n):
 	return itertools.izip(*(itertools.islice(g, i, None) for i, g in enumerate(itertools.tee(xs, n))))
 def print_dict(counts,n):
@@ -32,6 +33,22 @@ def grouper(n, iterable, fillvalue=None):
 def out_error(string, clear=True):
 	if clear: sys.stderr.write("\x1b[2J\x1b[H")
 	print(string, file=sys.stderr)
+def memo_lemma(token):
+  word,pos = token
+  if(not word): return token
+  word = word.lower()
+  key = "\t".join([word,pos])
+  lemma = None
+  if(key in lemma_cache):
+    return [lemma_cache[key],pos]
+  if(pos[0] == 'V'):
+    lemma = lmtzr.lemmatize(word,wn.VERB)
+  elif(pos[0] == 'N'):
+    lemma = lmtzr.lemmatize(word,wn.NOUN)
+  if(not lemma):
+    lemma = word
+  lemma_cache[key] = lemma
+  return [lemma,pos]
 def is_object(token):
   hsh = "\t".join(token)
   if(hsh in is_object_dict):
@@ -40,7 +57,6 @@ def is_object(token):
     is_object_dict[hsh] = (False, None)
     return (False, None)
   lemmatize = wn.morphy(token[0].lower(),wn.NOUN)
-  #blacklist = ["jenny","peter","catherine",] # names mapped to objects...
   if(not lemmatize):
     is_object_dict[hsh] = (False, None)
     return (False, None)
@@ -75,59 +91,30 @@ def list_files(path):
   f_count = 0
   for file in glob.glob(path+"/*"):
     f_count += 1
-    if(f_count%500==0): out_error("{} files".format(f_count))
+    if(True): out_error("{} files".format(f_count))
     yield file
 
-def verb_object_filter(iter):
-  for line_seq in each_cons(iter,2): #changed to enable lookahead...
-    line = line_seq[0]
-    word, pos = [x.rstrip() for x in line.split("\t")]
-    #tagger somehow doesn't do periods...
-    period = (len(word) > 1 and word[-1] == ".")
-    if(period):
-      word = word[:-1]
-    #people subjects
-    if(pos == "PRP"):
-      yield ["s/he", "s"]
-    #adjective or adjective-object
-    if(pos == "JJ"):
-      word2,pos2 = [x.rstrip() for x in line_seq[1].split("\t")]
-      is_o2, o2 = is_object([word2,pos2])
-      if(is_o2):
-        yield [word.lower()+"-"+o2, "o"]
-      else:
-        yield [word.lower(), "adj"]
-    #object
-    is_o, o = is_object([word,pos])
-    if(is_o):
-      yield [o,"o"]
-    is_v, v = is_action([word,pos])
-    #verb
-    if(is_v):
-      yield [v,"v"]
-    #punctuation (kill streams with ? !)
-    if(pos == "."):
-      yield [word, word]
-    #kill streams with and
-    if(pos == "CC"):
-      yield ["&", "cc"]
-    #add a period, if one was tacked on
-    if(period):
-      yield [".", "."]
-
 # file -> line
-def iter_lines(iter):
+def iter_tokens(iter):
   for file in iter:
     if file: # Stupid None from grouper...
       with open(file,"r") as f:
-        for line in f: yield line
+        for line in f:
+          word, pos = [x.rstrip() for x in line.split("\t")]
+          word = word.lower()
+          if(word[-1] == "."):
+            yield [word[:-1], pos]
+            yield [".", "."]
+          else:
+            yield [word, pos]
 
-# line -> words
-def iter_words(iter):
-  articles = set(["a", "the", "an"])
-  for line in iter:
-    for w in line.rstrip().split():
-      if(not w in articles): yield w.lower()
+def f_tokens(ite):
+  for tk in ite:
+    word,pos = tk
+    if(pos[0] == "N" or pos[0] == "V" or pos == "JJ" or pos == "PRP"):
+      yield memo_lemma(tk)
+    elif(pos[0] == "."):
+      yield tk
 
 def n_grams(n):
   def over(iter):
@@ -148,43 +135,40 @@ def count_items(iter):
     table["\t\t".join(i)] += 1
     yield table
 
-def v_or_o(iter):
-  for seq in iter:
-    ok = [["s","v","o"], ["o","v","o"], ["s","v","adj"]]
-    def check_ok(s,ty):
-      return seq[0][1] == ty[0] and seq[1][1] == ty[1] and seq[2][1] == ty[2]
-    if(any([check_ok(seq, t) for t in ok])): # v,o or o,v
-      yield "\t".join([" ".join(s) for s in seq])
-      # v_ = [seq[0][0], "_"]
-      # _o = ["_", seq[1][0]]
-      # v_o = [seq[0][0], seq[1][0]]
-      # yield [v_,_o,v_o]
-      #for i in [v_,_o,v_o]: yield i
-
-def s_v(iter):
-  for seq in iter:
-    if(seq[0][1] == "s" and seq[1][1] == "v"): # v,o or o,v
-      yield [" ".join(s) for s in seq]
-
 def possible(iter):
   for seq in iter:
     for x,y in [[x,y] for x in seq[0] for y in seq[1] if x != y]:
       yield [" ".join(x), " ".join(y)]
 
+v = atom(lambda x: (x[1][0] == "V", memo_lemma(x)))
+n = atom(lambda x: (x[1][0] == "N", memo_lemma(x)))
+adj = atom(lambda x: (x[1] == "JJ", x))
+end = atom(lambda x: ((x[1] == "."), x))
+s = atom(lambda x: (x[1] == "PRP", ["s/he", "PRP"]))
+
+adjo = comb_then([adj,n], lambda x: [x[0][0] + "_" + x[1][0], "NJJ"])
+nvo = comb_then([comb_or([n,s]),v,comb_or([adjo,n])])
+star = atom(lambda x: (True,x))
+filter_tokens = comb_or([v,n,adj,s,end,skip(star)])
+extract_relations = comb_or([nvo,skip(star)])
+
+f = iter_many(filter_tokens)
+e = iter_many(extract_relations, lambda x: [" ".join(y) for y in x])
+
 def with_tags(path):
-  process = pipe([iter_lines, verb_object_filter, n_grams(3), v_or_o, skip_grams2(5), count_items], list_files(path))
+  process = pipe([iter_tokens, f_tokens, e, count_items], list_files(path))
   count = 0
   saved = None
   for p in process:
     count += 1
     saved = p
     #print("\t".join(p))
-    # if(count % 10000 == 0):
-    #   #out_error(p)
-    #   out_error(print_dict(p,30))
+    if(count % 100 == 0):
+      #out_error(p)
+      out_error(print_dict(p,30))
     # if(count % 1000000 == 0):
     #   break
-  print(print_dict(saved,None))
+  #print(print_dict(saved,None))
 
 
 #reverb_like_thing("I go to the store.")

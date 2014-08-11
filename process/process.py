@@ -25,9 +25,11 @@ def interleave(item,ls): return sum(([item,i] for i in ls), ls[0:1])
 def n_filters(filters,stream):
 	for f in filters: stream = itertools.ifilter(f,stream)
 	for i in stream: yield i
-def out_error(string, clear=True): 
-	if clear:
-		sys.stderr.write("\x1b[2J\x1b[H")
+def pipe(funcs,stream):
+  for f in func: stream = f(stream)
+  for i in stream: yield i
+def out_error(string, clear=True):
+	if clear: sys.stderr.write("\x1b[2J\x1b[H")
 	print(string, file=sys.stderr)
 def gram_list(counts,n):
 	top = sorted(counts.iteritems(), key=operator.itemgetter(1), reverse=True)

@@ -4,7 +4,7 @@ f1 = sys.argv[1]
 f2 = sys.argv[2]
 n = int(sys.argv[3])
 
-GRAM_L = 3
+GRAM_L = 1
 
 def extract_grams(file):
   count = 0

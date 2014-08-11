@@ -18,9 +18,10 @@ def normalized_weight(n1,n2):
 
 for line in fileinput.input():
   first, second, count = line.split('\t')
-  weights[make_key(first,second)] = int(count)
-  connec[first].append(second)
-  for el in [first, second]: uniq_nodes.add(el)
+  if(int(count) > 100):
+    weights[make_key(first,second)] = int(count)
+    connec[first].append(second)
+    for el in [first, second]: uniq_nodes.add(el)
 
 ordered_uniq = sorted(uniq_nodes) # does set change ordering?
 node_map = { node:idx for idx, node in enumerate(ordered_uniq) }

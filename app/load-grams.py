@@ -7,11 +7,11 @@ db = client['app27963874']
 
 bigrams = db['grams']
 
-for i,line in enumerate(fileinput.input()):
-  if(i % 100 == 0): print(i)
-  parts = line.split("\t")
-  v = parts[0]
-  o = parts[1]
-  count = int(parts[3])
-  if(count > 2):
-    bigrams.insert({"verb": v, "object": o, "count": count})
+def data_stream():
+  for i,line in enumerate(fileinput.input()):
+    v,o,count = line.split("\t")
+    count = int(count)
+    readable = "{} {} ({})".format(v,o,count)
+    yield {"verb": v, "object": o, "count": count, "show":readable}
+
+bigrams.insert(data_stream())
