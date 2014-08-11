@@ -12,6 +12,12 @@ import sys
 stream = iter([[1],[2],[3]])
 words = iter([["i", "PRP"], ["go", "VB"], ["to", "TO"], ["the", "ART"], ["store", "NN"]])
 
+def append_iter(v,itr):
+  def thunk():
+    yield v
+    for i in itr: yield i
+  return thunk
+
 def comb_or(ps):
   def par(iterator):
     for p in ps:
@@ -52,7 +58,8 @@ def atom(l,can_call=False):
       if(check_match):
         return (v, True, iterator)
       else:
-        return (None, False, itertools.chain([v],iterator))
+        iterator = itertools.chain.from_iterable([[v], iterator])
+        return (None, False, iterator)
     except StopIteration:
       return (None, False, iter([]))
   return par
@@ -115,6 +122,13 @@ def iter_many(p,post=None):
 #     word,pos = [x.rstrip() for x in l.split("\t")]
 #     yield [word,pos]
 
+o = atom("o")
+n = atom("n")
+j = atom("j")
+p = atom("p")
+nj = comb_or([o,n,j])
+nj_p = comb_then([nj,many(p)])
+print(nj_p(iter("npppp")))
 
 # parse, state, rest = mal(words)
 # print(parse)

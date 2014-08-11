@@ -91,7 +91,7 @@ def list_files(path):
   f_count = 0
   for file in glob.glob(path+"/*"):
     f_count += 1
-    if(True): out_error("{} files".format(f_count))
+    if(f_count % 1 == 0): out_error("{} files".format(f_count))
     yield file
 
 # file -> line
@@ -140,7 +140,7 @@ def possible(iter):
     for x,y in [[x,y] for x in seq[0] for y in seq[1] if x != y]:
       yield [" ".join(x), " ".join(y)]
 
-v = atom(lambda x: (x[1][0] == "V", memo_lemma(x)))
+v = atom(lambda x: (x[1][0] == "V", x))
 n = atom(lambda x: (x[1][0] == "N", memo_lemma(x)))
 adj = atom(lambda x: (x[1] == "JJ", x))
 end = atom(lambda x: ((x[1] == "."), x))
@@ -155,17 +155,20 @@ extract_relations = comb_or([nvo,skip(star)])
 f = iter_many(filter_tokens)
 e = iter_many(extract_relations, lambda x: [" ".join(y) for y in x])
 
+def with_skip(f): return iter_many(comb_or([f,skip(star)]))
+
 def with_tags(path):
-  process = pipe([iter_tokens, f_tokens, e, count_items], list_files(path))
+  process = pipe([iter_tokens, f_tokens, with_skip(adjo)], list_files(path))
   count = 0
   saved = None
   for p in process:
     count += 1
     saved = p
+    print(p)
     #print("\t".join(p))
-    if(count % 100 == 0):
-      #out_error(p)
-      out_error(print_dict(p,30))
+    # if(count % 10000 == 0):
+    #   #out_error(p)
+    #   out_error(print_dict(p,30))
     # if(count % 1000000 == 0):
     #   break
   #print(print_dict(saved,None))
