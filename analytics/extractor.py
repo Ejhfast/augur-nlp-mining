@@ -3,6 +3,7 @@ from collections import defaultdict, Counter, deque
 import multiprocessing as mp
 import nltk
 from nltk.corpus import wordnet as wn
+from nltk.stem.wordnet import WordNetLemmatizer
 import fileinput
 import itertools
 import operator
@@ -12,6 +13,10 @@ import sys
 #Global hashes
 is_object_dict = defaultdict(tuple)
 is_action_dict = defaultdict(tuple)
+lemma_cache = {}
+hyp_cache = {}
+
+lmtzr = WordNetLemmatizer()
 
 # Utils
 def pipe(gens,stream):
@@ -32,7 +37,24 @@ def grouper(n, iterable, fillvalue=None):
 def out_error(string, clear=True):
 	if clear: sys.stderr.write("\x1b[2J\x1b[H")
 	print(string, file=sys.stderr)
-def is_object(token):
+def get_supertypes(w,t=wn.NOUN):
+  key = "\t".join([w,t])
+  if(key in hyp_cache):
+    return hyp_cache[key]
+  syn = wn.synsets(w,t)
+  if(len(syn) > 0):
+    all_p = [s.hypernym_paths() for s in syn[:2]]
+    result = itertools.chain.from_iterable(all_p)
+    hyp_cache[key] = list(result)
+    return result
+  else:
+    hyp_cache[key] = []
+    return []
+def has_hypernym(token,syn):
+  word,pos = token
+  paths = get_supertypes(word, wn.NOUN)
+  return any([wn.synset(syn) in p for p in paths])
+def is_object(token,typ='entity.n.01'):
   hsh = "\t".join(token)
   if(hsh in is_object_dict):
     return is_object_dict[hsh]
@@ -45,8 +67,8 @@ def is_object(token):
     is_object_dict[hsh] = (False, None)
     return (False, None)
   synsets = wn.synsets(lemmatize)
-  hypernyms = [s.lowest_common_hypernyms(wn.synset('object.n.01')) for s in synsets]
-  check_objects = [wn.synset('object.n.01') in o for o in hypernyms]
+  hypernyms = [s.lowest_common_hypernyms(wn.synset(typ)) for s in synsets]
+  check_objects = [wn.synset(typ) in o for o in hypernyms]
   if(reduce(operator.or_, check_objects)):
     is_object_dict[hsh] = (True, lemmatize)
     return (True, lemmatize)
@@ -68,7 +90,27 @@ def is_action(token):
   else:
     is_action_dict[hsh] = (True, lemmatize)
     return (True, lemmatize)
-
+def memo_lemma(token):
+  word,pos = token
+  if(not word): return token
+  word = word.lower()
+  if(word[-1] == "." and len(word) > 1):
+    word = word[:-1]
+  key = "\t".join([word,pos])
+  lemma = None
+  if(key in lemma_cache):
+    return [lemma_cache[key],pos]
+  if(pos[0] == 'V'):
+    if(word in ["'m", "'s"]):
+      lemma = "be"
+    else:
+      lemma = lmtzr.lemmatize(word,wn.VERB)
+  elif(pos[0] == 'N'):
+    lemma = lmtzr.lemmatize(word,wn.NOUN)
+  if(not lemma):
+    lemma = word
+  lemma_cache[key] = lemma
+  return [lemma,pos]
 
 # path -> files
 def list_files(path):
@@ -78,8 +120,48 @@ def list_files(path):
     if(f_count%500==0): out_error("{} files".format(f_count))
     yield file
 
+def in_range(ite):
+  n = 30
+  gps = each_cons(ite,n)
+  for seq in gps:
+    words = [[x.rstrip() for x in line.split("\t")] for line in seq]
+    nouns = filter(lambda x: x[1][0] == "N", words)
+    nouns = [memo_lemma(x) for x in nouns]
+    people = filter(lambda x: has_hypernym(x, "person.n.01"), nouns)
+    objects = filter(lambda x: has_hypernym(x, "instrumentality.n.03"), nouns)
+    locations = filter(lambda x: has_hypernym(x, "building.n.01") or has_hypernym(x,"geographical_area.n.01"), nouns)
+    stuff = [locations, people, objects]
+    wild = ["_","*"]
+    stuff = [list(itertools.chain([wild],s)) for s in stuff] # widlcard
+    comb = itertools.product(*stuff)
+    for c in comb:
+      #print(c)
+      yield [" ".join(x) for x in c]
+    for i in range(n):
+      gps.next() # no need to repeat window...
+
+def person_location_filter(ite):
+  for line in ite:
+    word, pos = [x.rstrip() for x in line.split("\t")]
+    word, pos = memo_lemma([word,pos])
+
+    if(pos[0] == "N"):
+      if(has_hypernym([word,pos],"instrumentality.n.03")):
+          yield [word,"object"]
+
+      if(has_hypernym([word,pos],"person.n.01")):
+          yield [word,"person"]
+
+      if(has_hypernym([word,pos],"building.n.01")):
+          yield [word,"location"]
+
+      if(has_hypernym([word,pos],"geographical_area.n.01")):
+          yield [word,"location"]
+
+
 def verb_object_filter(iter):
-  for line_seq in each_cons(iter,2): #changed to enable lookahead...
+  lookahead = each_cons(iter,2)
+  for line_seq in lookahead: #changed to enable lookahead...
     line = line_seq[0]
     word, pos = [x.rstrip() for x in line.split("\t")]
     #tagger somehow doesn't do periods...
@@ -88,23 +170,45 @@ def verb_object_filter(iter):
       word = word[:-1]
     #people subjects
     if(pos == "PRP"):
+      if(word.lower() == "it"):
+        yield ["it", "n"]
       yield ["s/he", "s"]
+
     #adjective or adjective-object
     if(pos == "JJ"):
       word2,pos2 = [x.rstrip() for x in line_seq[1].split("\t")]
       is_o2, o2 = is_object([word2,pos2])
       if(is_o2):
-        yield [word.lower()+"-"+o2, "o"]
+        lookahead.next()
+        yield [word.lower()+"-"+o2, "n"]
       else:
         yield [word.lower(), "adj"]
-    #object
+
+
     is_o, o = is_object([word,pos])
     if(is_o):
-      yield [o,"o"]
-    is_v, v = is_action([word,pos])
+      word2,pos2 = [x.rstrip() for x in line_seq[1].split("\t")]
+      is_o2, o2 = is_object([word2,pos2])
+      if(is_o2):
+        lookahead.next()
+        yield [o+"-"+o2, "n"]
+      else:
+        yield [o,"n"]
+
     #verb
-    if(is_v):
-      yield [v,"v"]
+    if(pos[0] == "V"):
+      if(pos == "VBN"):
+        None
+        #yield [word.lower(), "vbn"]
+      else:
+        word2,pos2 = [x.rstrip() for x in line_seq[1].split("\t")]
+        l1, p1 = memo_lemma([word,pos])
+        if(pos2 == "TO" or pos2 == "IN"):
+          lookahead.next()
+          yield [l1+"-"+word2.lower(),"v"]
+        else:
+          yield [l1,"v"]
+
     #punctuation (kill streams with ? !)
     if(pos == "."):
       yield [word, word]
@@ -148,13 +252,20 @@ def count_items(iter):
     table["\t\t".join(i)] += 1
     yield table
 
+def p_or_l(ite):
+  for seq in ite:
+    print(seq)
+    seq = sorted(seq,key=lambda x:x[1], reverse=True)
+    if(seq[0][1] == "person" and seq[1][1] == "object" and seq[2][1] == "location"):
+      yield [" ".join(s) for s in seq]
+
 def v_or_o(iter):
   for seq in iter:
-    ok = [["s","v","o"], ["o","v","o"], ["s","v","adj"]]
+    ok = [["s","v","n"], ["n","v","n"], ["s","v","adj"]]
     def check_ok(s,ty):
       return seq[0][1] == ty[0] and seq[1][1] == ty[1] and seq[2][1] == ty[2]
     if(any([check_ok(seq, t) for t in ok])): # v,o or o,v
-      yield "\t".join([" ".join(s) for s in seq])
+      yield [" ".join(s) for s in seq]
       # v_ = [seq[0][0], "_"]
       # _o = ["_", seq[1][0]]
       # v_o = [seq[0][0], seq[1][0]]
@@ -172,7 +283,7 @@ def possible(iter):
       yield [" ".join(x), " ".join(y)]
 
 def with_tags(path):
-  process = pipe([iter_lines, verb_object_filter, n_grams(3), v_or_o, skip_grams2(5), count_items], list_files(path))
+  process = pipe([iter_lines, in_range, count_items], list_files(path))
   count = 0
   saved = None
   for p in process:
