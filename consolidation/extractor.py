@@ -58,12 +58,18 @@ def relation_filter(iter):
     if(period):
       word = word[:-1]
 
-    #people subjects
-    if(pos == "PRP"):
-      if(word.lower() == "it"):
-        yield ["it", "n"]
-      yield ["s/he", "s"]
-      continue
+    # #people subjects
+    # if(pos == "PRP"):
+    #   if(word.lower() == "it"):
+    #     yield ["it", "n"]
+    #   yield ["s/he", "s"]
+    #   continue
+
+    if(has_hypernym([word,pos], "person.n.01")):
+      p, ps = memo_lemma([word,pos])
+      if(not p in ["have"]):
+        yield [p,"p"]
+        continue
 
     #adjective or adjective-object
     if(pos == "JJ"):
@@ -143,7 +149,8 @@ def count_items(iter):
 
 def valid_relations(iter):
   for seq in iter:
-    ok = [["s","v","n"], ["n","v","n"], ["s","v","adj"]]
+    ok = [["p","v","n"], ["n","v","n"], ["p","v","adj"],
+          ["n","v","p"], ["p","v","p"]]
     def check_ok(s,ty):
       return seq[0][1] == ty[0] and seq[1][1] == ty[1] and seq[2][1] == ty[2]
     if(any([check_ok(seq, t) for t in ok])): # v,o or o,v
@@ -185,7 +192,7 @@ def do_print(process):
   for p in process:
     count += 1
     saved = p
-    if(count % 10000 == 0):
+    if(count % 100 == 0):
       out_error(print_dict(p,30))
   print(print_dict(saved,None))
 
@@ -198,7 +205,7 @@ def scene_context(path,files=None):
 def rel_grams(path,files=None):
   if(not files):
     files = list_files(path)
-  process = pipe([wedge(10), iter_lines, relation_filter, n_grams(3),
+  process = pipe([wedge(500), iter_lines, relation_filter, n_grams(3),
                   valid_relations, count_items], files)
   return process
 
@@ -210,5 +217,5 @@ def bi_rel_grams(path,files=None):
                   count_items], files)
   return process
 
-#do_print(bi_rel_grams(sys.argv[1]))
-do_parallel(sys.argv[1], rel_grams)
+do_print(rel_grams(sys.argv[1]))
+#do_parallel(sys.argv[1], rel_grams)

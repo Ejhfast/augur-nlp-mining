@@ -50,9 +50,11 @@ def get_supertypes(w,t=wn.NOUN):
   else:
     hyp_cache[key] = []
     return []
-def has_hypernym(token,syn):
+def has_hypernym(token,syn,t=wn.NOUN):
   word,pos = token
-  paths = get_supertypes(word, wn.NOUN)
+  if(pos[0] == "V"):
+    t=wn.VERB
+  paths = get_supertypes(word, t)
   return any([wn.synset(syn) in p for p in paths])
 def is_object(token,typ='entity.n.01'):
   hsh = "\t".join(token)
