@@ -58,12 +58,12 @@ def relation_filter(iter):
     if(period):
       word = word[:-1]
 
-    # #people subjects
-    # if(pos == "PRP"):
-    #   if(word.lower() == "it"):
-    #     yield ["it", "n"]
-    #   yield ["s/he", "s"]
-    #   continue
+    #people subjects
+    if(pos == "PRP"):
+      if(word.lower() == "it"):
+        continue #yield ["it", "n"]
+      yield ["s/he", "s"]
+      continue
 
     if(has_hypernym([word,pos], "person.n.01")):
       p, ps = memo_lemma([word,pos])
@@ -95,6 +95,7 @@ def relation_filter(iter):
 
     #verb
     if(pos[0] == "V"):
+    #if(has_hypernym([word,pos],"act.v.01") or has_hypernym([word,pos],"move.v.02")):
       word2,pos2 = [x.rstrip() for x in line_seq[1].split("\t")]
       l1, p1 = memo_lemma([word,pos])
       if(pos2 == "TO" or pos2 == "IN"):
@@ -150,11 +151,17 @@ def count_items(iter):
 def valid_relations(iter):
   for seq in iter:
     ok = [["p","v","n"], ["n","v","n"], ["p","v","adj"],
-          ["n","v","p"], ["p","v","p"]]
+          ["n","v","p"], ["p","v","p"], ["s","v","n"], ["s","v","p"]]
     def check_ok(s,ty):
       return seq[0][1] == ty[0] and seq[1][1] == ty[1] and seq[2][1] == ty[2]
     if(any([check_ok(seq, t) for t in ok])): # v,o or o,v
       yield [" ".join(s) for s in seq]
+
+def subject_match_subject(it):
+  for seq in it:
+    #if(seq[0][0].split(" ")[-1] == "p" and seq[1][0].split(" ")[-1] == "p"):
+    if(seq[0][0] == seq[1][0]):  
+      yield seq
 
 def string_gram(iter):
   for seq in iter:
@@ -212,10 +219,10 @@ def rel_grams(path,files=None):
 def bi_rel_grams(path,files=None):
   if(not files):
     files = list_files(path)
-  process = pipe([wedge(10), iter_lines, relation_filter, n_grams(3),
-                  valid_relations, skip_grams2(10), string_gram,
+  process = pipe([wedge(500), iter_lines, relation_filter, n_grams(3),
+                  valid_relations, n_grams(2), subject_match_subject, string_gram,
                   count_items], files)
   return process
 
-do_print(rel_grams(sys.argv[1]))
-#do_parallel(sys.argv[1], rel_grams)
+#do_print(bi_rel_grams(sys.argv[1]))
+do_parallel(sys.argv[1], bi_rel_grams)
