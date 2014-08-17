@@ -37,8 +37,8 @@ def in_range(syns,n):
       nouns = filter(lambda x: x[1][0] == "N", words)
       nouns = [memo_lemma(x) for x in nouns]
       stuff = [filter(f,nouns) for f in funcs]
-      wild = ["_","*"]
-      stuff = [list(itertools.chain([wild],s)) for s in stuff] # widlcard
+      #wild = ["_","*"]
+      #stuff = [list(itertools.chain([wild],s)) for s in stuff] # widlcard
       comb = itertools.product(*stuff)
       for c in comb:
         if(not all([a == c[0] for a in c])):
@@ -148,6 +148,14 @@ def count_items(iter):
     table["\t\t".join(i)] += 1
     yield table
 
+def tfidf(it):
+  tfidf = defaultdict(int)
+  table = defaultdict(int)
+  for i in it:
+    for k in i: tfidf[k] += 1
+    table["\t\t".join(i)] += 1
+    yield (table, tfidf)
+
 def valid_relations(iter):
   for seq in iter:
     ok = [["p","v","n"], ["n","v","n"], ["p","v","adj"],
@@ -160,7 +168,7 @@ def valid_relations(iter):
 def subject_match_subject(it):
   for seq in it:
     #if(seq[0][0].split(" ")[-1] == "p" and seq[1][0].split(" ")[-1] == "p"):
-    if(seq[0][0] == seq[1][0]):  
+    if(seq[0][0] == seq[1][0]):
       yield seq
 
 def string_gram(iter):
@@ -197,23 +205,24 @@ def do_print(process):
   count = 0
   saved = None
   for p in process:
+    tab,tf = p
     count += 1
     saved = p
-    if(count % 100 == 0):
-      out_error(print_dict(p,30))
+    if(count % 500 == 0):
+      out_error(print_dict_tf(tab,tf,30))
   print(print_dict(saved,None))
 
 def scene_context(path,files=None):
   if(not files):
     files = list_files(path)
   fs = [["building.n.01","geographical_area.n.01"], ["person.n.01"], ["instrumentality.n.03"]]
-  return pipe([iter_lines, in_range(fs,30), count_items], files)
+  return pipe([iter_lines, in_range(fs,30), tfidf], files)
 
 def rel_grams(path,files=None):
   if(not files):
     files = list_files(path)
   process = pipe([wedge(500), iter_lines, relation_filter, n_grams(3),
-                  valid_relations, count_items], files)
+                  valid_relations, tfidf], files)
   return process
 
 def bi_rel_grams(path,files=None):
@@ -224,5 +233,5 @@ def bi_rel_grams(path,files=None):
                   count_items], files)
   return process
 
-#do_print(bi_rel_grams(sys.argv[1]))
-do_parallel(sys.argv[1], bi_rel_grams)
+do_print(scene_context(sys.argv[1]))
+#do_parallel(sys.argv[1], bi_rel_grams)
