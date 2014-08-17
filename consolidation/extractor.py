@@ -34,9 +34,9 @@ def in_range(syns,n):
     gps = each_cons(ite,n)
     for seq in gps:
       words = [[x.rstrip() for x in line.split("\t")] for line in seq]
-      nouns = filter(lambda x: x[1][0] == "N", words)
-      nouns = [memo_lemma(x) for x in nouns]
-      stuff = [filter(f,nouns) for f in funcs]
+      #nouns = filter(lambda x: x[1][0] == "N", words)
+      words = [memo_lemma(x) for x in words]
+      stuff = [filter(f,words) for f in funcs]
       #wild = ["_","*"]
       #stuff = [list(itertools.chain([wild],s)) for s in stuff] # widlcard
       comb = itertools.product(*stuff)
@@ -195,11 +195,15 @@ def do_parallel(path,proc,chunksize=1000):
   comp = [pool.apply_async(ret, args=(proc,fs)) for fs in chunks]
   results = [r.get() for r in comp]
   final_dict = defaultdict(int)
+  tfidf = defaultdict(int)
   for r in results:
+    tab,tf=r
     if r:
-      for k,v in r.iteritems():
+      for k,v in tab.iteritems():
         final_dict[k] += v
-  print(print_dict(final_dict,None))
+      for k,v in tf.iteritems():
+        tfidf[k] += v
+  print(print_dict_tf(final_dict,tfidf,None))
 
 def do_print(process):
   count = 0
@@ -215,8 +219,17 @@ def do_print(process):
 def scene_context(path,files=None):
   if(not files):
     files = list_files(path)
-  fs = [["building.n.01","geographical_area.n.01"], ["person.n.01"], ["instrumentality.n.03"]]
-  return pipe([iter_lines, in_range(fs,30), tfidf], files)
+  #fs = [["building.n.01","geographical_area.n.01"], ["person.n.01"], ["instrumentality.n.03"]]
+  #fs = [["building.n.01","geographical_area.n.01"], ["person.n.01"]]
+  #fs = [["building.n.01","geographical_area.n.01"], ["instrumentality.n.03"]]
+  #fs = [["person.n.01"], ["instrumentality.n.03"]]
+  #fs = [["instrumentality.n.03"], ["instrumentality.n.03"]]
+  #fs = [["person.n.01"], ["person.n.01"]]
+  #fs = [["person.n.01"], ["move.v.02","act.v.01","travel.v.01"]]
+  #fs = [["building.n.01","geographical_area.n.01"], ["move.v.02","act.v.01","travel.v.01"]]
+  #fs = [["move.v.02","act.v.01","travel.v.01"], ["move.v.02","act.v.01","travel.v.01"]]
+  fs = [["move.v.02","act.v.01","travel.v.01"], ["instrumentality.n.03"]]
+  return pipe([wedge(500), iter_lines, in_range(fs,30), tfidf], files)
 
 def rel_grams(path,files=None):
   if(not files):
@@ -233,5 +246,5 @@ def bi_rel_grams(path,files=None):
                   count_items], files)
   return process
 
-do_print(scene_context(sys.argv[1]))
-#do_parallel(sys.argv[1], bi_rel_grams)
+#do_print(scene_context(sys.argv[1]))
+do_parallel(sys.argv[1], scene_context)
