@@ -1,3 +1,4 @@
+"""Util functions"""
 from __future__ import print_function
 from collections import defaultdict
 from nltk.corpus import wordnet as wn

@@ -1,3 +1,4 @@
+"""Takes in as input a directory of pos-tagged files, and outputs the extractions"""
 from __future__ import print_function
 from collections import defaultdict, Counter, deque
 import multiprocessing as mp
@@ -271,5 +272,6 @@ def bi_rel_grams(path,files=None):
                   tfidf], files)
   return process
 
-do_print(ctx_rel_gram(sys.argv[1]))
-#do_parallel(sys.argv[1], bi_rel_grams)
+if __name__ == '__main__':
+  do_print(ctx_rel_gram(sys.argv[1]))
+  #do_parallel(sys.argv[1], bi_rel_grams)
