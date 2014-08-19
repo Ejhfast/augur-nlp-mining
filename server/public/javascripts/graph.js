@@ -1,6 +1,6 @@
 (function($){
 
-  var files = ["./verb-object.json"]
+  var files = ["../jsons/objects-pos.json"]
 
   for(var i =0; i <files.length; i++){
     (function(i, $){
