@@ -47,6 +47,22 @@ def in_range(syns,n):
         gps.next() # no need to repeat window...
   return cl
 
+def context_relgram(n,syns,gen):
+  def cl(it):
+    def is_context(x):
+      return any([has_hypernym(x,i) for i in syns])
+    window = each_cons(it,n)
+    for w in window:
+      words = [[x.rstrip() for x in line.split("\t")] for line in w]
+      words = [memo_lemma(x) for x in words]
+      ctxs = filter(is_context, words)
+      for out in gen(w):
+        for ctx in ctxs:
+          yield [ctx[0]]+out
+    for i in range(n):
+      window.next()
+  return cl
+
 def relation_filter(iter):
   lookahead = each_cons(iter,2)
   for line_seq in lookahead: #changed to enable lookahead...
@@ -59,13 +75,13 @@ def relation_filter(iter):
       word = word[:-1]
 
     #people subjects
-    #if(pos == "PRP"):
+    # if(pos == "PRP"):
     #  if(word.lower() == "it"):
     #    continue #yield ["it", "n"]
     #  yield ["s/he", "s"]
     #  continue
-
-    #if(has_hypernym([word,pos], "person.n.01")):
+    #
+    # if(has_hypernym([word,pos], "person.n.01")):
     #  p, ps = memo_lemma([word,pos])
     #  if(not p in ["have"]):
     #    yield [p,"p"]
@@ -239,6 +255,14 @@ def rel_grams(path,files=None):
                   valid_relations, tfidf], files)
   return process
 
+def ctx_rel_gram(path,files=None):
+  if(not files):
+    files = list_files(path)
+  syns = ["building.n.01","geographical_area.n.01"]
+  def rgram(it): return pipe([n_grams(2), valid_relations], relation_filter(it))
+  process = pipe([wedge(500), iter_lines, context_relgram(30,syns,rgram), tfidf], files)
+  return process
+
 def bi_rel_grams(path,files=None):
   if(not files):
     files = list_files(path)
@@ -247,5 +271,5 @@ def bi_rel_grams(path,files=None):
                   tfidf], files)
   return process
 
-do_print(bi_rel_grams(sys.argv[1]))
+do_print(ctx_rel_gram(sys.argv[1]))
 #do_parallel(sys.argv[1], bi_rel_grams)
