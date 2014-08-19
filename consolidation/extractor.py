@@ -59,17 +59,17 @@ def relation_filter(iter):
       word = word[:-1]
 
     #people subjects
-    if(pos == "PRP"):
-      if(word.lower() == "it"):
-        continue #yield ["it", "n"]
-      yield ["s/he", "s"]
-      continue
+    #if(pos == "PRP"):
+    #  if(word.lower() == "it"):
+    #    continue #yield ["it", "n"]
+    #  yield ["s/he", "s"]
+    #  continue
 
-    if(has_hypernym([word,pos], "person.n.01")):
-      p, ps = memo_lemma([word,pos])
-      if(not p in ["have"]):
-        yield [p,"p"]
-        continue
+    #if(has_hypernym([word,pos], "person.n.01")):
+    #  p, ps = memo_lemma([word,pos])
+    #  if(not p in ["have"]):
+    #    yield [p,"p"]
+    #    continue
 
     #adjective or adjective-object
     if(pos == "JJ"):
@@ -158,10 +158,11 @@ def tfidf(it):
 
 def valid_relations(iter):
   for seq in iter:
-    ok = [["p","v","n"], ["n","v","n"], ["p","v","adj"],
-          ["n","v","p"], ["p","v","p"], ["s","v","n"], ["s","v","p"]]
+    ok = [["v","n"],["v","p"],["v","adj"]]
+    #ok = [["p","v","n"], ["n","v","n"], ["p","v","adj"],
+    #      ["n","v","p"], ["p","v","p"], ["s","v","n"], ["s","v","p"]]
     def check_ok(s,ty):
-      return seq[0][1] == ty[0] and seq[1][1] == ty[1] and seq[2][1] == ty[2]
+      return seq[0][1] == ty[0] and seq[1][1] == ty[1]# and seq[2][1] == ty[2]
     if(any([check_ok(seq, t) for t in ok])): # v,o or o,v
       yield [" ".join(s) for s in seq]
 
@@ -234,17 +235,17 @@ def scene_context(path,files=None):
 def rel_grams(path,files=None):
   if(not files):
     files = list_files(path)
-  process = pipe([wedge(500), iter_lines, relation_filter, n_grams(3),
+  process = pipe([wedge(500), iter_lines, relation_filter, n_grams(2),
                   valid_relations, tfidf], files)
   return process
 
 def bi_rel_grams(path,files=None):
   if(not files):
     files = list_files(path)
-  process = pipe([wedge(500), iter_lines, relation_filter, n_grams(3),
-                  valid_relations, n_grams(2), subject_match_subject, string_gram,
-                  count_items], files)
+  process = pipe([wedge(500), iter_lines, relation_filter, n_grams(2),
+                  valid_relations, n_grams(2), string_gram,
+                  tfidf], files)
   return process
 
-#do_print(scene_context(sys.argv[1]))
-do_parallel(sys.argv[1], scene_context)
+do_print(bi_rel_grams(sys.argv[1]))
+#do_parallel(sys.argv[1], bi_rel_grams)

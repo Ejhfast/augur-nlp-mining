@@ -6,6 +6,7 @@ import itertools
 import operator
 import glob
 import sys
+import math
 
 #Global hashes
 is_object_dict = defaultdict(tuple)
@@ -31,6 +32,14 @@ def print_dict_tf(counts,tfidf,n):
       return -1
     else:
       return float(v)**len(k_counts) / reduce(lambda x,y:x*y, k_counts, 1)
+  def e_pmi(x,k_counts=None):
+    k,v = x[0],x[1]
+    if(not k_counts):
+      k_counts = all_k(k)
+    if(sum(k_counts) < float(len(k_counts))*1.5):
+      return -1
+    else:
+      return math.exp(float(v)) / reduce(lambda x,y:x*y, k_counts, 1)
   def scale_by(x,k_counts=None,i=None):
     k,v = x[0],x[1]
     if(not k_counts):
@@ -40,17 +49,18 @@ def print_dict_tf(counts,tfidf,n):
       return scale[i]
     else:
       return scale
-  top = sorted(counts.iteritems(), key=lambda x: (x[0].split("\t\t")[0],-1*pmi(x)))
+  top = sorted(counts.iteritems(), key=lambda x: (x[0].split("\t\t")[0],-1*e_pmi(x)))
   len_k = 0
   line = ""
   for k,v in itertools.islice(top,0,n):
+    if(not line==""): line += "\n"
     counts = all_k(k)
     len_k = len(counts)
     counts_str = "\t\t".join([str(x) for x in counts])
     scale_counts = "\t\t".join([str(x) for x in scale_by([k,v],counts)])
-    line += "\t\t".join([k,str(pmi([k,v],counts)),str(v),scale_counts,counts_str]) +"\n"
+    line += "\t\t".join([k,str(pmi([k,v],counts)),str(e_pmi([k,v],counts)),str(v),scale_counts,counts_str])
   s_keys = [[n+"_"+str(i) for i in range(len_k)] for n in ["k","scale","k_count"]]
-  header = "\t\t".join(s_keys[0]+["pmi","count"]+s_keys[1]+s_keys[2])+"\n"
+  header = "\t\t".join(s_keys[0]+["pmi","e_pmi","count"]+s_keys[1]+s_keys[2])+"\n"
   return header+line
 def print_dict(counts,n):
   top = sorted(counts.iteritems(), key=operator.itemgetter(1), reverse=True)
@@ -112,7 +122,7 @@ def memo_lemma(token):
   if(key in lemma_cache):
     return [lemma_cache[key],pos]
   if(pos[0] == 'V'):
-    if(word in ["'m", "'s","'re"]):
+    if(word in ["'m", "'s","'re","'ve"]):
       lemma = "be"
     else:
       lemma = lmtzr.lemmatize(word,wn.VERB)
