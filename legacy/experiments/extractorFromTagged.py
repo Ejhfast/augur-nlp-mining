@@ -1,3 +1,4 @@
+"""Takes in tagged text files"""
 from __future__ import print_function
 from collections import defaultdict, Counter, deque
 import multiprocessing as mp
@@ -301,6 +302,6 @@ def with_tags(path):
 
 
 #reverb_like_thing("I go to the store.")
-with_tags(sys.argv[1])
+#with_tags(sys.argv[1])
 #run_tags_multi(sys.argv[1])
-#list_files_multi(sys.argv[1])
+list_files_multi(sys.argv[1])

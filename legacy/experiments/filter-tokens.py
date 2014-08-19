@@ -1,3 +1,4 @@
+"""module responsible for substituting out objects w people in them, and replacing subject pronounds with the person, or the people"""
 import fileinput
 MIN = 1
 
