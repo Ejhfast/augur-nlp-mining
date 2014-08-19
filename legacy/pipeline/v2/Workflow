@@ -1,0 +1,9 @@
+run-reverb.py
+    -input : directory of text files
+    -output : tsv of relations
+       |
+       |    sampwhitelist.txt -- list of words to filter in
+       |      |
+       |      |
+       process.py:
+            - output : 

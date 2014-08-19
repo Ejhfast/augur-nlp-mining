@@ -1,0 +1,61 @@
+### Workflow
+
+Pipeline Overview:
+
+run-reverb -> filterfields -> prefilter (no more) -> filter-actions -> skip-gram -> count-grams
+
+
+Example command (to be executed in the process folder): 
+
+python prefilter.py ../files/sample.tsv | python filter-actions.py ../files/sampwhitelist.txt | python skip-gram.py | python count-grams.py
+
+
+First we download a big corpus of literature.
+
+Run Reverb
+
+Next we process all the .txt files in the literature with Reverb, which extracts an ordered list of subject-verb-object relationships and some other data. The default Reverb output is in the tsv format.
+
+Filter Fields
+
+We filter out the fields corresponding to the normalized subject-verb-object relationship. After further filtering non-ascii-decodable strings, we have the format:
+
+	he  do  it
+	he  ask  her
+	...
+
+Prefilter (no more)
+We substitute all names with 'he'
+
+Filter Actions
+We now filter to keep everything that has a person as its subject (we rely on pronouns: he, she, we, they, etc.) and doesn't have a person as its object. We rename matching subjects as "the person". We filter out all relations that aren't in a constructed "approved" token set: a base set of primitives for our analysis. , replacing them with NOPs. We collapse sequences of N NOPs into a single annotated NOP (e.g., "NOP 247" indicates a sequence of 247 NOPs before the next relation in the list). The output has the format:
+	the person  enter  the room
+	NOP 3
+	the person  open  the window
+	NOP 0
+	the person  close  the window
+	NOP 4
+	...
+
+
+Skip Gram
+
+Next we use the previous output to create ngrams, connected by the interleaved NOPs. We throw away ngrams that are too far away from each other in the text (e.g., throw away ngrams connected through NOP N, where N > 10). We then filter out the ngrams that have the same actions repeated in the first and second place. Example: "the person open the door  the person open the door" is now filtered out. The ngrams have the format
+	the person open the door  the person open the door
+	the person enter the room  the person open the window
+	the person open the window  the person close the window
+	...
+
+Count Grams
+
+We then compute frequencies of the ngrams, sort them in descending order, and produce the final output with the format:
+
+	the person close his eyes	the person open his eyes	421
+	the person close her eyes	the person open her eyes	245
+	the person shake her head	the person shake his head	106
+	...
+
+---Additional Notes----
+
+Generating a filter
+To generate a filter, supply a set of space-seperated words 'talk speak' etc.
