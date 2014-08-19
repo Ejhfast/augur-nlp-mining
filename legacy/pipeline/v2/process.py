@@ -90,8 +90,8 @@ def processChunk(filename, start, end):
 	ticker, last_grams = 0, None
 	reader = csv.reader(mylines, delimiter ='\t', quoting=csv.QUOTE_NONE)
 	pipeline = count_grams(skip_grams(person_filter(pre_filter(reader))))
-	for last in pipeline: 
-		pass		
+	for last in pipeline:
+		pass
 	final_output = gram_list(last,None)
 	print(final_output)
 
