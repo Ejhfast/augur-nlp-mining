@@ -3,3 +3,5 @@
 *.txt
 files/
 *.project
+*.json
+server/.git
