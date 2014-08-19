@@ -12,8 +12,8 @@ import multiprocessing as mp
 import subprocess
 
 
-DEFAULT_INPUT = '../files/watpad.tsv'
-DEFAULT_WHITELIST = '../files/sampwhitelist.txt'
+DEFAULT_INPUT = '../../../files/watpad.tsv'
+DEFAULT_WHITELIST = '../../../files/sampwhitelist.txt'
 nowhitelist = False
 
 def check_whitelist(actions):

@@ -2,7 +2,7 @@
 
 Pipeline Overview:
 
-run-reverb -> filterfields -> prefilter (no more) -> filter-actions -> skip-gram -> count-grams
+run-reverb (in another folder) -> filterfields -> prefilter -> filter-actions -> skip-gram -> count-grams
 
 
 Example command (to be executed in the process folder): 
@@ -24,7 +24,7 @@ We filter out the fields corresponding to the normalized subject-verb-object rel
 	he  ask  her
 	...
 
-Prefilter (no more)
+Prefilter 
 We substitute all names with 'he'
 
 Filter Actions

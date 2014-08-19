@@ -6,4 +6,9 @@ run-reverb.py
        |      |
        |      |
        process.py:
-            - output : 
+            - output : relation1    relations2  count
+                |
+                |
+                |
+                generate-graph.py
+                    - output: graph s.t. graph[relation1][relation2] = freq
