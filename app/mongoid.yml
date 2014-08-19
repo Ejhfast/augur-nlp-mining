@@ -1,8 +1,0 @@
-production:
-  sessions:
-    default:
-      database: app27963874
-      user: heroku
-      password: CAZLHM6u403vtolE0xF-YeQ9lxqkIrzTX5znEi8ybNK-amwqu6Qvq4UZ3L1XbEvL_pYESUP08cO67gTcipLQBg
-      hosts:
-        - candidate.35.mongolayer.com:10095
