@@ -10,11 +10,17 @@ import argparse
 import csv
 import multiprocessing as mp
 import subprocess
+import os
 
 
-DEFAULT_INPUT = '../../../files/watpad.tsv'
-DEFAULT_WHITELIST = '../../../files/sampwhitelist.txt'
+def getPath(filename):
+	pre = '../../../../../files/'
+	return os.path.normpath(os.path.realpath(__file__) + pre + filename)
+
+DEFAULT_INPUT = getPath('watpad.tsv')
+DEFAULT_WHITELIST = getPath('sampwhitelist.txt')
 nowhitelist = False
+
 
 def check_whitelist(actions):
 	return len(whitelist.intersection(" ".join(actions).split())) > 0
@@ -81,7 +87,7 @@ def count_grams(iter):
 def parse():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('input', nargs='?', default =DEFAULT_INPUT)
-	parser.add_argument('wl', nargs='?', type=argparse.FileType('r'), default=open(DEFAULT_WHITELIST))
+	parser.add_argument('wl', nargs='?', default=DEFAULT_WHITELIST)
 	parser.add_argument('--nowhitelist', action='store_true')
 	return parser.parse_args()
 
@@ -110,5 +116,6 @@ if __name__ == "__main__":
 	csv.field_size_limit(sys.maxsize)
 	args = parse()
 	nowhitelist = args.nowhitelist
-	whitelist = set(args.wl.read().split())
+	wl = open(args.wl);
+	whitelist = set(wl.read().split())
 	processAll(args.input)
