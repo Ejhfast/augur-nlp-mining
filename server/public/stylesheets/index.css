@@ -1,0 +1,69 @@
+html, body {
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
+}
+
+
+#wrap {
+    min-height: 100%;
+    height: auto !important;
+    margin: 0 auto -60px;
+}
+
+
+#footer-box {
+    background: rgb(250, 250, 250);
+    text-align: right;
+    font-size: 14px;
+    line-height: 30px;
+    color: #555;
+    height: 30px;
+}
+
+h1,h2,h3,h4,p, a{
+    font-weight: 100 !important;
+}
+
+#content{
+	background-color: #fff;
+}
+
+#sidebar{
+	position: fixed;
+}
+
+.bs-docs-sidebar .nav .nav>li>a {
+padding: 1px 0px;
+padding-left: 30px;
+font-size: 12px;
+}
+
+.bs-docs-sidebar .nav>li>a {
+display: block;
+padding: 4px 20px;
+font-size: 13px;
+font-weight: 500;
+color: #777;
+}
+
+.bs-docs-sidebar .nav>.active>a, .bs-docs-sidebar .nav>.active:hover>a, .bs-docs-sidebar .nav>.active:focus>a {
+font-weight: 700;
+color: #777;
+background-color: transparent;
+box-shadow: -1px 0px 0px #ddd; 
+}
+
+.bs-docs-sidebar .nav>li>a {
+display: block;
+padding: 4px 20px;
+font-size: 13px;
+font-weight: 500;
+color: #777;
+}
+
+.bs-docs-sidebar .nav>li>a:hover, .bs-docs-sidebar .nav>li>a:focus {
+color: #222;
+text-decoration: none;
+background-color: transparent;
+}
