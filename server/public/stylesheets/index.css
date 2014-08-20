@@ -23,6 +23,33 @@ html, body {
 
 h1,h2,h3,h4,p, a{
     font-weight: 100 !important;
+    color: #555 !important;
+}
+
+
+h1{
+	font-size: 40px !important;
+}
+
+#title{
+	margin-top: 80px;
+	margin-bottom: 150px;
+	padding-top: 50px;
+	padding-bottom: 50px;
+}
+
+#title > h1{
+	font-size: 70px !important;
+}
+
+p{
+	font-weight: 200 !important;
+	font-size: 15px !important;
+}
+
+strong {
+	font-weight: 200 !important;
+	color: #aae;
 }
 
 #content{
@@ -66,4 +93,14 @@ color: #777;
 color: #222;
 text-decoration: none;
 background-color: transparent;
+}
+
+.group{
+	margin: 70px 0px;
+	padding-left: 30px;
+	box-shadow: -1px 0px 0px #eee; 
+}
+
+.space{
+	padding: 70px 0px;
 }
