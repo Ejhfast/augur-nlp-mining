@@ -88,7 +88,7 @@ io.on('connection', function (socket) {
                 console.log('exec error: ' + error);
             }
         });
-        var process = spawn('python', ['../legacy/pipeline/v2/process.py', filename, './files/wh-dynam.txt']);
+        var process = spawn('python', ['../xpipelines/v2/process.py', filename, './files/wh-dynam.txt']);
 
         process.stdout.on('data', function (data) {
             data = data.toString('utf8');
