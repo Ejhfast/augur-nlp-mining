@@ -1,5 +1,6 @@
 from nltk.tag.stanford import POSTagger
 import os
+import fileinput
 
 class Tagger():
 	def __init__(self):
@@ -10,4 +11,5 @@ class Tagger():
 
 if __name__ == '__main__':
 	t = Tagger();
-	print t.tag('What is the airspeed of an unladen swallow ?')
+	for line in fileinput.input():
+		print t.tag(line)
