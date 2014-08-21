@@ -18,50 +18,377 @@ html
 										#left.col-md-8
 												#title.group
 													h1 Augur
-													h2 Making context possible
+													h2 Enriching contexts
 												.group
 													#Introduction
 														h1 Introduction
 														p While the emotional content of daily life plays an important role in human decision-making, computers often can't understand this content. By constructing an index of emotional semantics for everyday activities, Augur enables a broader set of affective interfaces and applications.
-														div#Goal
-														#API
+														#IntroAPI
 															h2 API
 															p The Augur API is a data store of common patterns of contextual expressions and activities.
-														#Applications
-															h2 Applications
-															p We demo 2 applications that leverage the capabilities of the Augur API. The first is an <strong>Smart-Scene Simulator</strong>. Given a scene of interest, such as a "temple", or a "hospital", Smart-Scene Simulator generates contextually relevant attributes of that scene. Attributes include the people in the scene, the actions they perform, and their interactions. The second application, <strong>ChaChaWrite</strong>, leverages the Augur API to enhance creative-writing tasks. Based on the story that is being formulated, ChaChaWrite provides contextually relevant ideas that contribute to generating the creative influx for writing.
+														#IntroApplications
+															h2Applications
+															p We demo 2 applications that leverage the capabilities of the Augur API. The first is an <strong>Smart-Scene Simulator</strong>. Given a scene of interest, such as a "temple", or a "hospital", Smart-Scene Simulator generates contextually relevant attributes of that scene. Attributes include the people in the scene, the actions they perform, and their interactions. The second application, <strong>FlowWrite</strong>, leverages the Augur API to enhance creative-writing tasks. Based on the story that is being formulated, FlowWrite provides contextually relevant ideas that contribute to generating the creative influx for writing.
 												.group
 													#UsingtheAPI
 														h1 Using the API
 														p We demonstrate a variety of calls that can be made to the API.
 														#scene2person
 															h2 Scene &#8594; Person
-															.space
+															p.
+																Given a <strong>Location</strong> such as a "hospital", or "hotel" on input, the API can generate
+																a list of people relevant to the context. Each of the outputs has a name field, a PMI
+																score, and a count score.
+															pre
+																code
+																	ul.output
+																			li
+																					span.v.t Name
+																					span.i.t PMI
+																					span.i.t Count
+																			li
+																					span.v manager
+																					span.i 0.002
+																					span.i 77.0
+																			li
+																					span.v concierge
+																					span.i 0.0012
+																					span.i 18.0
+																			li
+																					span.v guest
+																					span.i 0.0008
+																					span.i 81.0
+																			li
+																					span.v star
+																					span.i 0.0007
+																					span.i 84.0
+																			li
+																					span.v employee
+																					span.i 0.0006
+																					span.i 40.0
+																			li
+																					span.v clerk
+																					span.i 0.0006
+																					span.i 26.0
+																			li
+																					span.v driver
+																					span.i 0.0006
+																					span.i 73.0
+																			li
+																					span.v ritz
+																					span.i 0.0005
+																					span.i 13.0
+																			li
+																					span.v louis
+																					span.i 0.0005
+																					span.i 84.0
+																			li
+																					span.v valet
+																					span.i 0.0004
+																					span.i 17.0
+																			li
+																					span.v john
+																					span.i 0.0004
+																					span.i 85.0
+																			li
+																					span.v hand
+																					span.i 0.0004
+																					span.i 249.0
+																			li
+																					span.v heiress
+																					span.i 0.0004
+																					span.i 13.0
+																			li
+																					span.v man
+																					span.i 0.0003
+																					span.i 156.0
+																			li
+																					span.v cassandra
+																					span.i 0.0003
+																					span.i 26.0
+																			li
+																					span.v receptionist
+																					span.i 0.0003
+																					span.i 19.0
+																			li
+																					span.v fan
+																					span.i 0.0003
+																					span.i 43.0
+																			li
+																					span.v bishop
+																					span.i 0.0003
+																					span.i 27.0
 														#scene2object
 															h2 Scene &#8594; Object
-															.space
+															p.
+																Given a <strong>Location</strong> such as a "hospital", or "hotel" on input, the API can generate
+																a list of objects relevant to the context. Each of the outputs has a name field, a PMI
+																score, and a count score.
+															pre
+																code
+																	ul.output
+																			li
+																							span.v.t Name
+																							span.i.t PMI
+																							span.i.t Count
+																					li
+																							span.v elevator
+																							span.i 0.0026
+																							span.i 99.0
+																					li
+																							span.v staff
+																							span.i 0.0021
+																							span.i 91.0
+																					li
+																							span.v phone
+																							span.i 0.0016
+																							span.i 204.0
+																					li
+																							span.v taxi
+																							span.i 0.0016
+																							span.i 59.0
+																					li
+																							span.v cab
+																							span.i 0.0015
+																							span.i 61.0
+																					li
+																							span.v car
+																							span.i 0.0014
+																							span.i 296.0
+																					li
+																							span.v bar
+																							span.i 0.0011
+																							span.i 96.0
+																					li
+																							span.v desk
+																							span.i 0.0011
+																							span.i 94.0
+																					li
+																							span.v grand
+																							span.i 0.001
+																							span.i 59.0
+																					li
+																							span.v bag
+																							span.i 0.001
+																							span.i 123.0
+																					li
+																							span.v luggage
+																							span.i 0.0009
+																							span.i 30.0
+																					li
+																							span.v key
+																							span.i 0.0007
+																							span.i 71.0
+																					li
+																							span.v limo
+																							span.i 0.0007
+																							span.i 27.0
+																					li
+																							span.v call
+																							span.i 0.0006
+																							span.i 84.0
+																					li
+																							span.v plane
+																							span.i 0.0005
+																							span.i 41.0
+																					li
+																							span.v ride
+																							span.i 0.0005
+																							span.i 61.0
+																					li
+																							span.v fan
+																							span.i 0.0004
+																							span.i 43.0
+																					li
+																							span.v carriage
+																							span.i 0.0004
+																							span.i 35.0
+
 														#person2action
 															h2 Person &#8594; Action
-															.space
-										#right.col-md-4
+															p. 
+																Given a <strong>Person</strong>'s name such as a "gardener", or "doctor" on input, the API can generate
+																a list of actions relevant to the context. Each of the outputs has a name field, a PMI
+																score, and a count score.
+															pre
+																code
+																	ul.output
+																		li
+																			span.a.t Person
+																			span.a.t Action
+																			span.a.t Object
+																			span.a.t Count
+																		li
+																				span.a employee
+																				span.a complain-of
+																				span.a such-instance
+																				span.a.i 2.0
+																		li
+																				span.a employee
+																				span.a complain-of
+																				span.a odd-noise
+																				span.a.i 2.0
+																		li
+																				span.a employee
+																				span.a darn
+																				span.a staff
+																				span.a.i 2.0
+																		li
+																				span.a employee
+																				span.a come-with
+																				span.a pile
+																				span.a.i 2.0
+																		li
+																				span.a employee
+																				span.a involve-with
+																				span.a private
+																				span.a.i 2.0
+																		li
+																				span.a employee
+																				span.a type
+																				span.a computer
+																				span.a.i 2.0
+																		li
+																				span.a employee
+																				span.a ask
+																				span.a bos
+																				span.a.i 3.0
+																		li
+																				span.a employee
+																				span.a like
+																				span.a way
+																				span.a.i 2.0
+																		li
+																				span.a employee
+																				span.a have
+																				span.a heart
+																				span.a.i 2.0
+														#location2action
+															h2 Location &#8594; Action
+															p.
+																Given a <strong>Location</strong> such as a "hospital", or "hotel" on input, the API can generate
+																a list of actions relevant to the context. Each of the outputs has a verb field, an object field,
+																and a count score.
+															pre
+																code
+																	ul.output
+																		li
+																						span.a.t Verb
+																						span.a.t Object
+																						span.a.t Count
+																				li
+																						span.a acquire
+																						span.a dozen
+																						span.a.i 5.0
+																				li
+																						span.a stay-in
+																						span.a same-hotel
+																						span.a.i 8.0
+																				li
+																						span.a stay-at
+																						span.a same-hotel
+																						span.a.i 6.0
+																				li
+																						span.a book
+																						span.a hotel-room
+																						span.a.i 9.0
+																				li
+																						span.a be-in
+																						span.a hotel-room
+																						span.a.i 29.0
+																				li
+																						span.a make
+																						span.a way
+																						span.a.i 95.0
+																				li
+																						span.a open
+																						span.a door
+																						span.a.i 45.0
+																				li
+																						span.a share
+																						span.a hotel-room
+																						span.a.i 10.0
+																				li
+																						span.a walk-into
+																						span.a hotel-room
+																						span.a.i 12.0
+																				li
+																						span.a get
+																						span.a hotel-room
+																						span.a.i 27.0
+																				li
+																						span.a wan
+																						span.a na
+																						span.a.i 10.0
+																				li
+																						span.a minutes
+																						span.a later
+																						span.a.i 8.0
+																				li
+																						span.a pack
+																						span.a bag
+																						span.a.i 10.0
+																				li
+																						span.a sit-in
+																						span.a hotel-room
+																						span.a.i 9.0
+																				li
+																						span.a leave
+																						span.a hotel-room
+																						span.a.i 17.0
+																				li
+																						span.a go
+																						span.a hotel-room
+																						span.a.i 16.0
+																				li
+																						span.a let
+																						span.a go
+																						span.a.i 12.0
+																				li
+																						span.a stay-in
+																						span.a hotel-room
+																						span.a.i 7.0
+												.group
+													#Applications
+														h1 Applications
+														#AppFlowWrite
+															h2 FlowWrite
+															object#flowObj(type="text/html" data="http://localhost:4000/").hidden-xs.hidden-sm
+															p.
+																Flow Write is a novel text editor that uses data-mining to generate new associations for in-progress sentences. FlowWrite leverages the Augur API to be a design solution to generate sparks of ideas, and implement workarounds for Writer's block. Using such 'creative hinting', Flow Write accelerates creativity in writing tasks by automatically generating sentence-level ideas, allowing writers to progress faster through a story-writing task, and face fewer creative roadblocks. 
+														#AppS3
+															h2 Smart Scene Simulator
+															object#s3Obj(type="text/html" data="http://localhost:4000/game/garden").hidden-xs.hidden-sm
+															p Smart Scene Simulator can generate realistic simulation environments. Simply put in a location, i.e. hospital, and watch as the scene is filled with contextually relevant groups of people, and objects.
+												.group
+											#right.col-md-4
 												nav#sidebar.bs-docs-sidebar.hidden-print.hidden-xs.hidden-sm
 														ul.nav.bs-docs-sidenav(data-spy="affix")
 																li
 																	a(href='#Introduction') Introduction
 																	ul.nav
 																		li
-																			a(href='#API') API
+																			a(href='#IntroAPI') API
 																		li
-																			a(href='#Applications') Applications
+																			a(href='#IntroApplications') Applications
 																li
 																	a(href='#UsingtheAPI') Using the API
 																	ul.nav
 																		li
 																			a(href='#scene2person') Scene &#8594; Person
 																		li
-																			a(href='#scene2person') Scene &#8594; Object
+																			a(href='#scene2object') Scene &#8594; Object
 																		li
 																			a(href='#person2action') Person &#8594; Action
+																		li
+																			a(href='#location2action') Person &#8594; Action
+																li
+																	a(href='#Applications') Applications
+																	ul.nav
+																		li
+																			a(href='#AppFlowWrite') FlowWrite
+																		li
+																			a(href='#AppS3') Smart Scene Simulator
 		script(src='/javascripts/jquery.js')
 		script(src='/bootstrap/js/bootstrap.min.js')
 		script(src='/javascripts/index.js')

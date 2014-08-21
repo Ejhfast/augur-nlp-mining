@@ -104,3 +104,32 @@ background-color: transparent;
 .space{
 	padding: 70px 0px;
 }
+
+pre > code{
+	font-family: 'Open Sans' !important;
+}
+
+pre{
+	border: none;
+	border-radius: 0px;
+}
+
+#flowObj, #s3Obj{
+	width: 100%;
+	height: 400px;
+}
+
+.output{
+	padding-left: 10px;
+}
+
+.output > li{
+	list-style-type: none;
+	display: block;
+}
+
+
+.output > li > span{
+	width: 100px;
+	display: table-cell;
+}
